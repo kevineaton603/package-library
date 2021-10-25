@@ -1,0 +1,49 @@
+{
+    "root": true,
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "jest": true
+    },
+    "extends": [
+        "plugin:react/recommended",
+        // "airbnb",
+        "airbnb-typescript"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": "./tsconfig.json",
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": 12,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react",
+        "@typescript-eslint",
+        "import"
+    ],
+    "rules": {
+        "object-property-newline": ["error", { "allowAllPropertiesOnSameLine": false }],
+        "object-curly-newline": ["error", {
+            "ObjectExpression": {
+                "consistent": true,
+                "multiline": true,
+                "minProperties": 2
+            },
+            "ObjectPattern": {
+                "consistent": true,
+                "multiline": true
+            },
+            "ImportDeclaration": {
+                "consistent": true,
+                "multiline": true
+            },
+            "ExportDeclaration": {
+                "consistent": true,
+                "multiline": true
+            }
+        }]
+    }
+}
