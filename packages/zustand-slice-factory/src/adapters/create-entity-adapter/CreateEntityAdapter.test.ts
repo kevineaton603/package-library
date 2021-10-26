@@ -10,25 +10,25 @@ const state: TestAppState = {
     lastHydrated: null,
     lastModified: null,
     actions: {
-      addMany: () => (appState) => appState,
-      addOne: () => (appState) => appState,
-      hydrateAll: () => (appState) => appState,
-      hydrateMany: () => (appState) => appState,
-      hydrateOne: () => (appState) => appState,
-      removeAll: () => (appState) => appState,
-      removeMany: () => (appState) => appState,
-      removeOne: () => (appState) => appState,
-      reset: () => (appState) => appState,
-      setAll: () => (appState) => appState,
-      upsertMany: () => (appState) => appState,
-      upsertOne: () => (appState) => appState,
+      addMany: () => {},
+      addOne: () => {},
+      hydrateAll: () => {},
+      hydrateMany: () => {},
+      hydrateOne: () => {},
+      removeAll: () => {},
+      removeMany: () => {},
+      removeOne: () => {},
+      reset: () => {},
+      setAll: () => {},
+      upsertMany: () => {},
+      upsertOne: () => {},
     },
   },
 };
 
 describe('Testing EntityAdapter', () => {
   it('Use SelectIdMethod', () => {
-    const adapter = createEntityAdapter<TestAppState, UserProfileModel>({
+    const adapter = createEntityAdapter<UserProfileModel>({
       selectId: (model) => model.username,
       sortComparer: (modelA, modelB) => modelA.username.localeCompare(modelB.username),
     });
@@ -40,7 +40,7 @@ describe('Testing EntityAdapter', () => {
   });
 
   it('Use SelectIdKey', () => {
-    const adapter = createEntityAdapter<TestAppState, UserProfileModel>({
+    const adapter = createEntityAdapter<UserProfileModel>({
       selectId: 'username',
       sortComparer: (modelA, modelB) => modelA.username.localeCompare(modelB.username),
     });
