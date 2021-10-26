@@ -2,10 +2,12 @@
  * @jest-environment jsdom
  */
 import create from 'zustand';
-import createVanilla from 'zustand/vanilla';
+import createVanilla, { SetState } from 'zustand/vanilla';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { renderHook } from '@testing-library/react-hooks';
-import createModelSlice, { ModelSliceState } from './CreateModelSlice';
+import createModelSlice, { createActionsState, ModelSliceState } from './CreateModelSlice';
+import { Action, ModelSliceActions, ModelSliceStateActions, SetAction } from '../../types';
+import { createStateActions } from '../../models/actions-state/ActionsState';
 
 type DuckModel = {
   noise: string;
@@ -17,20 +19,41 @@ const slice = createModelSlice<AppState, DuckModel>({
   selectSliceState: (appState) => appState.Duck,
 });
 
-const DuckState = {
-  ...slice.state,
-  actions: slice.actions,
-};
+type DuckActions = ModelSliceActions<AppState, DuckModel> & { setNoise: SetAction<AppState, [string]> };
 
-type DuckSliceState = ModelSliceState<AppState, DuckModel>;
+type DuckStateActions = ModelSliceStateActions<DuckModel> & { setNoise: Action<[string]> };
+
+type DuckSliceState = ModelSliceState<DuckModel, DuckStateActions>;
 
 type AppState = {
   Duck: DuckSliceState;
 };
 
+const setNoise: SetAction<AppState, [string]> = (set: SetState<AppState>) => (noise: string) => {
+  return set(state => ({
+    ...state,
+    [slice.name]: {
+      ...state[slice.name],
+      noise: noise,
+    },
+  }));
+};
+
+const allActions = {
+  ...slice.actions,
+  setNoise: setNoise,
+};
+
+// const a: () => SetAction<AppState, [string]> = () => {
+//   return (set) => () => set() 
+// };
+
 describe('Testing Zustand', () => {
-  const useStore = create<AppState>(() => ({
-    Duck: DuckState,
+  const useStore = create<AppState>((set) => ({
+    Duck: {
+      ...slice.state,
+      actions: createActionsState<AppState, DuckModel, DuckStateActions, DuckActions>(set, allActions),
+    },
   }));
 
   const logger = () => {};
@@ -43,14 +66,14 @@ describe('Testing Zustand', () => {
   });
 
   it('Test hydrate action', () => {
-    // renderHook(() => useStore(slice.actions.hydrate({ noise: 'Quack', elevation: 1000})));
-    useStore.setState(slice.actions.hydrate({
+    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
+    result.current.hydrate({
       noise: 'Quack',
       elevation: 10000, 
-    }));
+    });
     expect(useStore.getState().Duck.model?.noise).toBe('Quack');
     expect(useStore.getState().Duck.model?.elevation).toBe(10000);
-    renderHook(() => useStore(slice.actions.reset()));
+    result.current.reset();
     expect(useStore.getState().Duck.lastHydrated).toBe(null);
   });
 
@@ -60,8 +83,11 @@ describe('Testing Zustand', () => {
 });
 
 describe('Testing Zustand Vanilla', () => {
-  const useStore = createVanilla<AppState>(() => ({
-    Duck: DuckState,
+  const store = createVanilla<AppState>((set) => ({
+    Duck: {
+      ...slice.state,
+      actions: createStateActions<AppState, DuckStateActions, DuckActions>(set, allActions),
+    },
   }));
 
   const logger = () => {};
@@ -74,14 +100,16 @@ describe('Testing Zustand Vanilla', () => {
   });
 
   it('Test hydrate action', () => {
-    useStore.setState(slice.actions.hydrate({
+    const { Duck } = store.getState();
+    Duck.actions.hydrate({
       noise: 'Quack',
       elevation: 10000, 
-    }));
-    expect(useStore.getState().Duck.model?.noise).toBe('Quack');
-    expect(useStore.getState().Duck.model?.elevation).toBe(10000);
-    useStore.setState(slice.actions.reset());
-    expect(useStore.getState().Duck.lastHydrated).toBe(null);
+    });
+    
+    expect(store.getState().Duck.model?.noise).toBe('Quack');
+    expect(store.getState().Duck.model?.elevation).toBe(10000);
+    Duck.actions.reset();
+    expect(store.getState().Duck.lastHydrated).toBe(null);
   });
 
   it('Test update action', () => {});

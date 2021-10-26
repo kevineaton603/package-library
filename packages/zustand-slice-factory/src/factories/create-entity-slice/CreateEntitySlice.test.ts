@@ -1,8 +1,11 @@
 /**
  * @jest-environment jsdom
  */
+import { renderHook } from '@testing-library/react-hooks';
 import create from 'zustand';
 import createVanilla from 'zustand/vanilla';
+import { EntitySliceActions, EntitySliceStateActions } from '../..';
+import { createStateActions } from '../../models/actions-state/ActionsState';
 import createEntitySlice, { EntitySliceState } from './CreateEntitySlice';
 
 type AnimalModel = {
@@ -30,20 +33,18 @@ const slice = createEntitySlice<AppState, AnimalModel>({
   },
 });
 
-const AnimalState = {
-  ...slice.state,
-  actions: slice.actions,
-};
-
-type AnimalSliceState = EntitySliceState<AppState, AnimalModel>;
+type AnimalSliceState = EntitySliceState<AnimalModel>;
 
 type AppState = {
   Animal: AnimalSliceState;
 };
 
 describe('Testing Zustand', () => {
-  const useStore = create<AppState>(() => ({
-    Animal: AnimalState,
+  const useStore = create<AppState>((set) => ({
+    Animal: {
+      ...slice.state,
+      actions: createStateActions<AppState, EntitySliceStateActions<AnimalModel>, EntitySliceActions<AppState, AnimalModel>>(set, slice.actions),
+    },
   }));
 
   let logger = () => {};
@@ -56,7 +57,8 @@ describe('Testing Zustand', () => {
   });
 
   it('Test hydrate action', () => {
-    useStore.setState(slice.actions.hydrateAll([
+    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
+    result.current.hydrateAll([
       {
         name: 'Duck',
         noise: 'Quack',
@@ -65,10 +67,10 @@ describe('Testing Zustand', () => {
         name: 'Cow',
         noise: 'Moo',
       },
-    ]));
+    ]);
     expect(useStore.getState().Animal.entities?.Duck?.noise).toBe('Quack');
     expect(useStore.getState().Animal.entities?.Duck?.name).toBe('Duck');
-    useStore.setState(slice.actions.reset());
+    result.current.reset();
     expect(useStore.getState().Animal.lastHydrated).toBe(null);
   });
 
@@ -78,8 +80,11 @@ describe('Testing Zustand', () => {
 });
 
 describe('Testing Zustand Vanilla', () => {
-  const useStore = createVanilla<AppState>(() => ({
-    Animal: AnimalState,
+  const useStore = createVanilla<AppState>((set) => ({
+    Animal: {
+      ...slice.state,
+      actions: createStateActions<AppState, EntitySliceStateActions<AnimalModel>, EntitySliceActions<AppState, AnimalModel>>(set, slice.actions),
+    },
   }));
 
   let logger = () => {};
@@ -91,7 +96,8 @@ describe('Testing Zustand Vanilla', () => {
     logger(); // unsub logger
   });
   it('Test hydrate action', () => {
-    useStore.setState(slice.actions.hydrateAll([
+    const { Animal } = useStore.getState();
+    Animal.actions.hydrateAll([
       {
         name: 'Duck',
         noise: 'Quack',
@@ -100,10 +106,10 @@ describe('Testing Zustand Vanilla', () => {
         name: 'Cow',
         noise: 'Moo',
       },
-    ]));
+    ]);
     expect(useStore.getState().Animal.entities?.Duck?.noise).toBe('Quack');
     expect(useStore.getState().Animal.entities?.Duck?.name).toBe('Duck');
-    useStore.setState(slice.actions.reset());
+    Animal.actions.reset();
     expect(useStore.getState().Animal.lastHydrated).toBe(null);
   });
 

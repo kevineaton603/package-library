@@ -1,3 +1,4 @@
+import { SetState } from 'zustand';
 import { EntityStateType } from '../models/entity-state';
 import { ModelStateType } from '../models/model-state';
 
@@ -5,16 +6,17 @@ export type Comparer<TModel> = (a: TModel, b: TModel) => number;
 
 export type EntityId = number | string;
 
-export type SetAction<TAppState extends object> = (state: TAppState) => void;
+export type Action<TArguments extends any[] = undefined[]> = (...args: TArguments) => void;
 
-export type Action<TAppState extends object, TArguments extends any[] = undefined[]> = (...args: TArguments)  => SetAction<TAppState>;
+export type SetAction<TAppState extends object, TArguments extends any[] = undefined[]> = (set: SetState<TAppState>) => Action<TArguments>;
 
 export type Selector<TAppState extends object, TReturnType, TArguments extends any[] = undefined[]> = TArguments extends undefined[]
   ? (appState: TAppState) => TReturnType
   : (...args: TArguments) => (appState: TAppState) => TReturnType;
 
-export type SliceSelectors<TAppState extends object, TSliceState> = {
+export type SliceSelectors<TAppState extends object, TSliceState, TActionsState extends Record<string, Action<any[]>> = Record<string, Action<any[]>>> = {
   selectSliceState: Selector<TAppState, TSliceState>
+  selectActions: (state: TAppState) => TActionsState
 };
 
 export type MetaSliceSelectors<TAppState extends object> = {
@@ -23,11 +25,11 @@ export type MetaSliceSelectors<TAppState extends object> = {
   selectLastHydrated: Selector<TAppState, string | null>;
 };
 
-export type ModelSliceSelectors<TAppState extends object, TModel extends object> = SliceSelectors<TAppState, ModelStateType<TModel>> & MetaSliceSelectors<TAppState> & {
+export type ModelSliceSelectors<TAppState extends object, TModel extends object> = SliceSelectors<TAppState, ModelStateType<TModel>, ModelSliceStateActions<TModel>> & MetaSliceSelectors<TAppState> & {
   selectModel: (state: TAppState) => TModel;
 };
 
-export type EntitySliceSelectors<TAppState extends object, TEntity extends object> = SliceSelectors<TAppState, EntityStateType<TAppState, TEntity>> & MetaSliceSelectors<TAppState> & {
+export type EntitySliceSelectors<TAppState extends object, TEntity extends object> = SliceSelectors<TAppState, EntityStateType<TEntity>, EntitySliceStateActions<TEntity>> & MetaSliceSelectors<TAppState> & {
   selectIds: Selector<TAppState, EntityId[]>;
   selectEntities: Selector<TAppState, Record<EntityId, TEntity>>;
   selectAll: Selector<TAppState, TEntity[]>;
@@ -35,34 +37,54 @@ export type EntitySliceSelectors<TAppState extends object, TEntity extends objec
   selectById: Selector<TAppState, TEntity | undefined, [EntityId]>;
 };
 
+export type SliceStateActions = {
+  reset: Action;
+};
+
+export type ModelSliceStateActions<TModel extends object> = SliceStateActions & {
+  hydrate: Action<[TModel]>;
+  set: Action<[TModel]>;
+  update: Action<[TModel]>;
+};
+
+export type EntitySliceStateActions<TEntity extends object> = SliceStateActions & {
+  addOne: Action<[TEntity]>;
+  addMany: Action<[TEntity[]]>;
+  hydrateOne: Action<[TEntity]>
+  hydrateMany: Action<[TEntity[]]>;
+  hydrateAll: Action<[TEntity[]]>;
+  // updateOne: Action<TAppState, TEntity>;
+  // updateMany: Action<TAppState, TEntity[]>;
+  upsertOne: Action<[TEntity]>;
+  upsertMany: Action<[TEntity[]]>;
+  removeOne: Action<[EntityId]>;
+  removeMany: Action<[EntityId[]]>;
+  removeAll: Action;
+  setAll: Action<[TEntity[]]>;
+};
+
 export type SliceActions<TAppState extends object> = {
-  reset: Action<TAppState>;
+  reset: SetAction<TAppState>;
 };
 
 export type ModelSliceActions<TAppState extends object, TModel extends object> = SliceActions<TAppState> & {
-  hydrate: Action<TAppState, [TModel]>;
-  set: Action<TAppState, [TModel]>;
-  update: Action<TAppState, [TModel]>;
+  hydrate: SetAction<TAppState, [TModel]>;
+  set: SetAction<TAppState, [TModel]>;
+  update: SetAction<TAppState, [TModel]>;
 };
 
 export type EntitySliceActions<TAppState extends object, TEntity extends object> = SliceActions<TAppState> & {
-  /**
-     * accepts a single entity, and adds it if it's not already present
-     */
-  addOne: Action<TAppState, [TEntity]>;
-  /**
-     * accepts an array of entities or an object in the shape of Record<EntityId, TEntity>, and adds them if not already present
-     */
-  addMany: Action<TAppState, [TEntity[]]>;
-  hydrateOne: Action<TAppState, [TEntity]>
-  hydrateMany: Action<TAppState, [TEntity[]]>;
-  hydrateAll: Action<TAppState, [TEntity[]]>;
+  addOne: SetAction<TAppState, [TEntity]>;
+  addMany: SetAction<TAppState, [TEntity[]]>;
+  hydrateOne: SetAction<TAppState, [TEntity]>
+  hydrateMany: SetAction<TAppState, [TEntity[]]>;
+  hydrateAll: SetAction<TAppState, [TEntity[]]>;
   // updateOne: Action<TAppState, TEntity>;
   // updateMany: Action<TAppState, TEntity[]>;
-  upsertOne: Action<TAppState, [TEntity]>;
-  upsertMany: Action<TAppState, [TEntity[]]>;
-  removeOne: Action<TAppState, [EntityId]>;
-  removeMany: Action<TAppState, [EntityId[]]>;
-  removeAll: Action<TAppState>;
-  setAll: Action<TAppState, [TEntity[]]>;
+  upsertOne: SetAction<TAppState, [TEntity]>;
+  upsertMany: SetAction<TAppState, [TEntity[]]>;
+  removeOne: SetAction<TAppState, [EntityId]>;
+  removeMany: SetAction<TAppState, [EntityId[]]>;
+  removeAll: SetAction<TAppState>;
+  setAll: SetAction<TAppState, [TEntity[]]>;
 };

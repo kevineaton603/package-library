@@ -26,25 +26,24 @@ type EntityAdapterProps<TEntity extends object> = {
 };
 
 type EntityAdapterAction<
-    TAppState extends object,
     TEntity extends object,
     TArguments extends any[] = undefined[],
-    TSliceState extends EntitySliceState<TAppState, TEntity> = EntitySliceState<TAppState, TEntity>> = (state: TSliceState, ...args: TArguments) => TSliceState;
+    TSliceState extends EntitySliceState<TEntity> = EntitySliceState<TEntity>> = (state: TSliceState, ...args: TArguments) => TSliceState;
 
-export type EntitySliceActions<TAppState extends object, TEntity extends object, TSliceState extends EntitySliceState<TAppState, TEntity>> = {
-  addOne: EntityAdapterAction<TAppState, TEntity, [TEntity], TSliceState>;
-  addMany: EntityAdapterAction<TAppState, TEntity, [TEntity[]], TSliceState>;
-  updateOne: EntityAdapterAction<TAppState, TEntity, [Update<TEntity>], TSliceState>;
-  updateMany: EntityAdapterAction<TAppState, TEntity, [Update<TEntity>[]], TSliceState>;
-  upsertOne: EntityAdapterAction<TAppState, TEntity, [TEntity], TSliceState>;
-  upsertMany: EntityAdapterAction<TAppState, TEntity, [TEntity[]], TSliceState>;
-  removeOne: EntityAdapterAction<TAppState, TEntity, [EntityId], TSliceState>;
-  removeMany: EntityAdapterAction<TAppState, TEntity, [EntityId[]], TSliceState>;
-  removeAll: EntityAdapterAction<TAppState, TEntity, [], TSliceState>;
-  setAll: EntityAdapterAction<TAppState, TEntity, [TEntity[]], TSliceState>;
+export type EntitySliceActions<TEntity extends object, TSliceState extends EntitySliceState<TEntity>> = {
+  addOne: EntityAdapterAction<TEntity, [TEntity], TSliceState>;
+  addMany: EntityAdapterAction<TEntity, [TEntity[]], TSliceState>;
+  updateOne: EntityAdapterAction<TEntity, [Update<TEntity>], TSliceState>;
+  updateMany: EntityAdapterAction<TEntity, [Update<TEntity>[]], TSliceState>;
+  upsertOne: EntityAdapterAction<TEntity, [TEntity], TSliceState>;
+  upsertMany: EntityAdapterAction<TEntity, [TEntity[]], TSliceState>;
+  removeOne: EntityAdapterAction<TEntity, [EntityId], TSliceState>;
+  removeMany: EntityAdapterAction<TEntity, [EntityId[]], TSliceState>;
+  removeAll: EntityAdapterAction<TEntity, [], TSliceState>;
+  setAll: EntityAdapterAction<TEntity, [TEntity[]], TSliceState>;
 };
 
-const createEntityAdapter = <TAppState extends object, TEntity extends object, TSliceState extends EntitySliceState<TAppState, TEntity> = EntitySliceState<TAppState, TEntity>>(options: EntityAdapterProps<TEntity>) => {
+const createEntityAdapter = <TEntity extends object, TSliceState extends EntitySliceState<TEntity> = EntitySliceState<TEntity>>(options: EntityAdapterProps<TEntity>) => {
   const selectId: SelectIdMethod<TEntity> = typeof options.selectId === 'string'
         || typeof options.selectId === 'number'
         || typeof options.selectId === 'symbol'
@@ -60,14 +59,14 @@ const createEntityAdapter = <TAppState extends object, TEntity extends object, T
     return newState;
   };
 
-  const addMany: EntityAdapterAction<TAppState, TEntity, [TEntity[]], TSliceState> = (state, entities) => {
+  const addMany: EntityAdapterAction<TEntity, [TEntity[]], TSliceState> = (state, entities) => {
     const newEntities = entities.filter(entity => !(selectId(entity) in state.entities));
     return newEntities.length !== 0 ? merge(newEntities, state) : state;
   };
 
-  const addOne: EntityAdapterAction<TAppState, TEntity, [TEntity], TSliceState> = (state, entity) => addMany(state, [entity]);
+  const addOne: EntityAdapterAction<TEntity, [TEntity], TSliceState> = (state, entity) => addMany(state, [entity]);
 
-  const removeAll: EntityAdapterAction<TAppState, TEntity, [], TSliceState> = (state) => {
+  const removeAll: EntityAdapterAction<TEntity, [], TSliceState> = (state) => {
     const newState = cloneDeep(state);
     newState.ids = [];
     newState.entities = {};
@@ -75,7 +74,7 @@ const createEntityAdapter = <TAppState extends object, TEntity extends object, T
     return newState;
   };
 
-  const removeMany: EntityAdapterAction<TAppState, TEntity, [EntityId[]], TSliceState> = (state, ids) => {
+  const removeMany: EntityAdapterAction<TEntity, [EntityId[]], TSliceState> = (state, ids) => {
     const newState = cloneDeep(state);
     ids.forEach(id => {
       if (id in newState.entities) {
@@ -86,11 +85,11 @@ const createEntityAdapter = <TAppState extends object, TEntity extends object, T
     return newState;
   };
 
-  const removeOne: EntityAdapterAction<TAppState, TEntity, [EntityId], TSliceState> = (state, id) => removeMany(state, [id]);
+  const removeOne: EntityAdapterAction<TEntity, [EntityId], TSliceState> = (state, id) => removeMany(state, [id]);
 
-  const setAll: EntityAdapterAction<TAppState, TEntity, [TEntity[]], TSliceState> = (state, entities) => addMany(removeAll(state), entities);
+  const setAll: EntityAdapterAction<TEntity, [TEntity[]], TSliceState> = (state, entities) => addMany(removeAll(state), entities);
 
-  const updateMany: EntityAdapterAction<TAppState, TEntity, [Update<TEntity>[]], TSliceState> = (state, updates) => {
+  const updateMany: EntityAdapterAction<TEntity, [Update<TEntity>[]], TSliceState> = (state, updates) => {
     const newState = cloneDeep(state);
     const updatedEntities = updates.reduce((acc, update) => {
       if (update.id in newState.entities) {
@@ -104,9 +103,9 @@ const createEntityAdapter = <TAppState extends object, TEntity extends object, T
     return merge(updatedEntities, newState);
   };
 
-  const updateOne: EntityAdapterAction<TAppState, TEntity, [Update<TEntity>], TSliceState> = (state, update) => updateMany(state, [update]);
+  const updateOne: EntityAdapterAction<TEntity, [Update<TEntity>], TSliceState> = (state, update) => updateMany(state, [update]);
 
-  const upsertMany: EntityAdapterAction<TAppState, TEntity, [TEntity[]], TSliceState> = (state, entities) => {
+  const upsertMany: EntityAdapterAction<TEntity, [TEntity[]], TSliceState> = (state, entities) => {
     const { added, updated } = entities.reduce((acc, entity) => state.entities?.[selectId(entity)]
       ? {
         ...acc,
@@ -126,9 +125,9 @@ const createEntityAdapter = <TAppState extends object, TEntity extends object, T
     return addMany(updateMany(state, updated), added);
   };
 
-  const upsertOne: EntityAdapterAction<TAppState, TEntity, [TEntity], TSliceState> = (state, entity) => upsertMany(state, [entity]);
+  const upsertOne: EntityAdapterAction<TEntity, [TEntity], TSliceState> = (state, entity) => upsertMany(state, [entity]);
 
-  const actions: EntitySliceActions<TAppState, TEntity, TSliceState> = {
+  const actions: EntitySliceActions<TEntity, TSliceState> = {
     addMany: addMany,
     addOne: addOne,
     removeAll: removeAll,

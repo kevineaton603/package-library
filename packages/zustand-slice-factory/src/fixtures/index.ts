@@ -13,9 +13,9 @@ export type UserProfileModel = {
   roles: UserRoleEnum[];
 };
 
-export type UserProfileEntityState = EntitySliceState<TestAppState, UserProfileModel>;
+export type UserProfileEntityState = EntitySliceState<UserProfileModel>;
 
-export type UserProfileModelState = ModelSliceState<TestAppState, UserProfileModel>;
+export type UserProfileModelState = ModelSliceState<UserProfileModel>;
 
 export type TestAppState = {
   User: UserProfileModelState;
@@ -31,10 +31,10 @@ export const PremiumProfile = Object.freeze<UserProfileModelState>({
   lastHydrated: null,
   lastModified: null,
   actions: {
-    hydrate: () => (appState) => appState,
-    reset: () => (appState) => appState,
-    set: () => (appState) => appState,
-    update: () => (appState) => appState,
+    hydrate: () => {},
+    reset: () => {},
+    set: () => {},
+    update: () => {},
   },
 });
 
@@ -47,10 +47,10 @@ export const BasicProfile = Object.freeze<UserProfileModelState>({
   lastHydrated: null,
   lastModified: null,
   actions: {
-    hydrate: () => (appState) => appState,
-    reset: () => (appState) => appState,
-    set: () => (appState) => appState,
-    update: () => (appState) => appState,
+    hydrate: () => {},
+    reset: () => {},
+    set: () => {},
+    update: () => {},
   },
 });
 
@@ -63,9 +63,9 @@ export const AdminProfile = Object.freeze<UserProfileModelState>({
   lastHydrated: null,
   lastModified: null,
   actions: {
-    hydrate: () => (appState) => appState,
-    reset: () => (appState) => appState,
-    set: () => (appState) => appState,
-    update: () => (appState) => appState,
+    hydrate: () => {},
+    reset: () => {},
+    set: () => {},
+    update: () => {},
   },
 });

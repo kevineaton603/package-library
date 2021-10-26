@@ -2,17 +2,17 @@ import { createSelector } from 'reselect';
 import createEntityAdapter, { SelectIdMethod } from '../../adapters/create-entity-adapter/CreateEntityAdapter';
 import createSliceAdapter from '../../adapters/create-slice-adapter';
 import EntityState, { EntityStateType } from '../../models/entity-state';
-import { Comparer, EntityId, EntitySliceActions, EntitySliceSelectors } from '../../types';
+import { Comparer, EntityId, EntitySliceActions, EntitySliceSelectors, EntitySliceStateActions } from '../../types';
 
 type EntitySliceOptions<TAppState extends object, TModel extends object> = {
   name: keyof TAppState;
-  selectSliceState: (appState: TAppState) => EntityStateType<TAppState, TModel>;
+  selectSliceState: (appState: TAppState) => EntitySliceState<TModel>;
   selectId: SelectIdMethod<TModel> | keyof TModel;
   sortComparer: Comparer<TModel>; // | false;
-  initialState?: Partial<EntityStateType<TAppState, TModel>>;
+  initialState?: Partial<EntityStateType<TModel>>;
 };
 
-export type EntitySliceState<TAppState extends object, TModel extends object, TSliceActions extends EntitySliceActions<TAppState, TModel> = EntitySliceActions<TAppState, TModel>> = EntityStateType<TAppState, TModel> & {
+export type EntitySliceState<TModel extends object, TSliceActions extends EntitySliceStateActions<TModel> = EntitySliceStateActions<TModel>> = EntityStateType<TModel> & {
   actions: TSliceActions
 };
 
@@ -20,13 +20,14 @@ export type EntitySlice<TAppState extends object, TModel extends object> = {
   name: keyof TAppState;
   actions: EntitySliceActions<TAppState, TModel>;
   selectors: EntitySliceSelectors<TAppState, TModel>;
-  state: EntityStateType<TAppState, TModel>;
+  state: EntityStateType<TModel>;
 };
 
 const createEntitySlice = <TAppState extends object, TEntity extends object>(options: EntitySliceOptions<TAppState, TEntity>) : EntitySlice<TAppState, TEntity>  => {
 
   const selectors: EntitySliceSelectors<TAppState, TEntity> = {
     selectSliceState: createSelector(options.selectSliceState, (model) => model),
+    selectActions: createSelector(options.selectSliceState, (model) => model.actions),
     selectEntities: createSelector(options.selectSliceState, (model) => model.entities),
     selectIds: createSelector(options.selectSliceState, (model) => model.ids),
     selectTotal: createSelector(options.selectSliceState, (model) => model.ids.length),
@@ -36,71 +37,67 @@ const createEntitySlice = <TAppState extends object, TEntity extends object>(opt
     selectById: (id: EntityId) => createSelector(options.selectSliceState, (model) => model.entities?.[id]),
   };
 
-  const entityAdapter = createEntityAdapter<TAppState, TEntity>({
+  const initialState = EntityState.create<TEntity>(options?.initialState);
+
+  const entityAdapter = createEntityAdapter<TEntity>({
     selectId: options.selectId,
     sortComparer: options.sortComparer, 
   });
   const sliceAdapter = createSliceAdapter();
 
   const actions: EntitySliceActions<TAppState, TEntity> = {
-    addMany: (models) => (state: TAppState) => ({
+    addMany: (set) => (models) => set(state => ({
       ...state,
-      [options.name]: sliceAdapter.setLastModified(entityAdapter.addMany(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>, models), null),  
-    }),
-    addOne: (model) => (state: TAppState) => ({
+      [options.name]: sliceAdapter.setLastModified(entityAdapter.addMany(state[options.name] as unknown as EntitySliceState<TEntity>, models), null),  
+    })),
+    addOne: (set) => (model) => set(state => ({
       ...state,
-      [options.name]: entityAdapter.addOne(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>, model), 
-    }),
-    hydrateAll: (models) => (state: TAppState) => ({
+      [options.name]: entityAdapter.addOne(state[options.name] as unknown as EntitySliceState<TEntity>, model), 
+    })),
+    hydrateAll:  (set) => (models) => set(state => ({
       ...state,
-      [options.name]: entityAdapter.setAll(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>, models), 
-    }),
-    hydrateMany: (models) => (state: TAppState) => ({
+      [options.name]: entityAdapter.setAll(state[options.name] as unknown as EntitySliceState<TEntity>, models), 
+    })),
+    hydrateMany: (set) => (models) => set(state => ({
       ...state,
-      [options.name]: entityAdapter.upsertMany(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>, models), 
-    }),
-    hydrateOne: (model) => (state: TAppState) => ({
+      [options.name]: entityAdapter.upsertMany(state[options.name] as unknown as EntitySliceState<TEntity>, models), 
+    })),
+    hydrateOne: (set) => (model) => set(state => ({
       ...state,
-      [options.name]: entityAdapter.upsertOne(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>, model), 
-    }),
-    removeAll: () => (state: TAppState) => ({
+      [options.name]: entityAdapter.upsertOne(state[options.name] as unknown as EntitySliceState<TEntity>, model), 
+    })),
+    removeAll: (set) => () => set(state => ({
       ...state,
-      [options.name]: entityAdapter.removeAll(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>), 
-    }),
-    removeMany: (models) => (state: TAppState) => ({
+      [options.name]: entityAdapter.removeAll(state[options.name] as unknown as EntitySliceState<TEntity>), 
+    })),
+    removeMany: (set) => (models) => set(state => ({
       ...state,
-      [options.name]: entityAdapter.removeMany(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>, models), 
-    }),
-    removeOne: (model) => (state: TAppState) => ({
+      [options.name]: entityAdapter.removeMany(state[options.name] as unknown as EntitySliceState<TEntity>, models), 
+    })),
+    removeOne: (set) => (model) => set(state => ({
       ...state,
-      [options.name]: entityAdapter.removeOne(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>, model), 
-    }),
-    
-    reset: () => (state: TAppState) => ({
+      [options.name]: entityAdapter.removeOne(state[options.name] as unknown as EntitySliceState<TEntity>, model), 
+    })),
+    reset: (set) => () => set(state => ({
       ...state,
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      [options.name]: initialState, 
-    }),
-    setAll: (models) => (state: TAppState) => ({
+      [options.name]: {
+        ...state[options.name],
+        ...initialState,
+      }, 
+    })),
+    setAll: (set) => (models) =>  set(state => ({
       ...state,
-      [options.name]: entityAdapter.setAll(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>, models), 
-    }),
-    // updateMany,
-    // updateOne,
-    upsertMany: (models) => (state: TAppState) => ({
+      [options.name]: entityAdapter.setAll(state[options.name] as unknown as EntitySliceState<TEntity>, models), 
+    })),
+    upsertMany: (set) => (models) => set(state => ({
       ...state,
-      [options.name]: entityAdapter.upsertMany(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>, models), 
-    }),
-    upsertOne: (model) => (state: TAppState) => ({
+      [options.name]: entityAdapter.upsertMany(state[options.name] as unknown as EntitySliceState<TEntity>, models), 
+    })),
+    upsertOne: (set) => (model) => set(state => ({
       ...state,
-      [options.name]: entityAdapter.upsertOne(state[options.name] as unknown as EntitySliceState<TAppState, TEntity>, model), 
-    }),
+      [options.name]: entityAdapter.upsertOne(state[options.name] as unknown as EntitySliceState<TEntity>, model), 
+    })),
   };
-
-  const initialState = EntityState.create<TAppState, TEntity>({
-    ...options?.initialState,
-    actions: actions,
-  });
 
   return ({
     name: options.name,
