@@ -15,12 +15,12 @@ const shared = {
 
 build({
   ...shared,
-  outfile: 'dist/index.js',
+  outfile: 'dist/zustand-slice-factory.js',
   format: 'cjs'
 })
 
 build({
   ...shared,
-  outfile: 'dist/index.esm.js',
+  outfile: 'dist/zustand-slice-factory.esm.js',
   format: 'esm'
 })
