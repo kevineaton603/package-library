@@ -8,3 +8,9 @@ export const createRecordFromArray = <T>(list: T[], keySelector: (item: T) => Re
     [keySelector(item)]: item, 
   }), {});
 };
+
+
+/**
+ * @internal
+ */
+export const getISOString = (dateTime: Date = new Date()): string => dateTime.toISOString();

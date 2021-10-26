@@ -4,7 +4,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import create from 'zustand';
 import createVanilla from 'zustand/vanilla';
-import { EntitySliceActions, EntitySliceStateActions } from '../..';
+import { EntitySliceSetActions, EntitySliceStateActions } from '../..';
 import { createStateActions } from '../../models/actions-state/ActionsState';
 import createEntitySlice, { EntitySliceState } from './CreateEntitySlice';
 
@@ -43,7 +43,7 @@ describe('Testing Zustand', () => {
   const useStore = create<AppState>((set) => ({
     Animal: {
       ...slice.state,
-      actions: createStateActions<AppState, EntitySliceStateActions<AnimalModel>, EntitySliceActions<AppState, AnimalModel>>(set, slice.actions),
+      actions: createStateActions<AppState, EntitySliceStateActions<AnimalModel>, EntitySliceSetActions<AppState, AnimalModel>>(set, slice.actions),
     },
   }));
 
@@ -83,7 +83,7 @@ describe('Testing Zustand Vanilla', () => {
   const useStore = createVanilla<AppState>((set) => ({
     Animal: {
       ...slice.state,
-      actions: createStateActions<AppState, EntitySliceStateActions<AnimalModel>, EntitySliceActions<AppState, AnimalModel>>(set, slice.actions),
+      actions: createStateActions<AppState, EntitySliceStateActions<AnimalModel>, EntitySliceSetActions<AppState, AnimalModel>>(set, slice.actions),
     },
   }));
 

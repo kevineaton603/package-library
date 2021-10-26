@@ -53,8 +53,6 @@ export type EntitySliceStateActions<TEntity extends object> = SliceStateActions 
   hydrateOne: Action<[TEntity]>
   hydrateMany: Action<[TEntity[]]>;
   hydrateAll: Action<[TEntity[]]>;
-  // updateOne: Action<TAppState, TEntity>;
-  // updateMany: Action<TAppState, TEntity[]>;
   upsertOne: Action<[TEntity]>;
   upsertMany: Action<[TEntity[]]>;
   removeOne: Action<[EntityId]>;
@@ -73,14 +71,12 @@ export type ModelSliceActions<TAppState extends object, TModel extends object> =
   update: SetAction<TAppState, [TModel]>;
 };
 
-export type EntitySliceActions<TAppState extends object, TEntity extends object> = SliceActions<TAppState> & {
+export type EntitySliceSetActions<TAppState extends object, TEntity extends object> = SliceActions<TAppState> & {
   addOne: SetAction<TAppState, [TEntity]>;
   addMany: SetAction<TAppState, [TEntity[]]>;
   hydrateOne: SetAction<TAppState, [TEntity]>
   hydrateMany: SetAction<TAppState, [TEntity[]]>;
   hydrateAll: SetAction<TAppState, [TEntity[]]>;
-  // updateOne: Action<TAppState, TEntity>;
-  // updateMany: Action<TAppState, TEntity[]>;
   upsertOne: SetAction<TAppState, [TEntity]>;
   upsertMany: SetAction<TAppState, [TEntity[]]>;
   removeOne: SetAction<TAppState, [EntityId]>;

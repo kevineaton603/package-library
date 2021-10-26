@@ -5,12 +5,12 @@ type SliceAdapterAction<
     TSliceState extends MetaStateType = MetaStateType,
 > = (state: TSliceState, ...args: TArguments) => TSliceState;
 
-const createSliceAdapter = () => {
-  const setLastModified: SliceAdapterAction<[string | null]> = (state, lastModified) => {
+const createSliceAdapter = <TSliceState extends MetaStateType = MetaStateType>() => {
+  const setLastModified: SliceAdapterAction<[string | null], TSliceState> = (state, lastModified) => {
     state.lastModified = lastModified;
     return state;
   };
-  const setLastHydrated: SliceAdapterAction<[string | null]> = (state, lastHydrated) => {
+  const setLastHydrated: SliceAdapterAction<[string | null], TSliceState> = (state, lastHydrated) => {
     state.lastHydrated = lastHydrated;
     return state;
   };
