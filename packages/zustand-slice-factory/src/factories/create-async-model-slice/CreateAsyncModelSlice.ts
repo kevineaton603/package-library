@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 import createSliceAdapter from '../../adapters/create-slice-adapter';
 import AsyncModelState, { AsyncModelStateType } from '../../models/async-model-state';
-import { Action, AsyncMetaSliceSelectors, AsyncSliceActions, AsyncSliceSetActions, SetAction, SliceSelectors } from '../../types';
+import { Action, AsyncMetaSliceSelectors, AsyncSliceStateActions, AsyncSliceSetActions, SetAction, SliceSelectors } from '../../types';
 import { getISOString } from '../../utils';
 
 export type AsyncModelSliceSelectors<TAppState extends object, TModel extends object, TError extends Error = Error> =
@@ -17,7 +17,7 @@ export type AsyncModelSliceSetActions<TAppState extends object, TModel extends o
   };
 
 export type AsyncModelSliceStateActions<TModel extends object, TError extends Error = Error> =
-  AsyncSliceActions<TError> & {
+  AsyncSliceStateActions<TError> & {
     hydrate: Action<[TModel]>;
     set: Action<[TModel]>;
     update: Action<[TModel]>;

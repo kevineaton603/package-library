@@ -39,7 +39,7 @@ export type SliceSetActions<TAppState extends object> = {
   reset: SetAction<TAppState>;
 };
 
-export type AsyncSliceActions<TError extends Error = Error> = SliceStateActions & {
+export type AsyncSliceStateActions<TError extends Error = Error> = SliceStateActions & {
   setError: Action<[TError]>;
   setStatus: Action<[StatusEnum]>;
 };
