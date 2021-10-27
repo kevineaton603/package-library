@@ -1,5 +1,6 @@
 {
     "root": true,
+    "ignorePatterns": ["esbuild.config.js", "node_modules", "dist"],
     "env": {
         "browser": true,
         "es2021": true,

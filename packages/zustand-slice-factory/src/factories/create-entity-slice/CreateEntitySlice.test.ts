@@ -48,7 +48,7 @@ describe('Testing Zustand', () => {
 
   let logger = () => {};
   beforeAll(() => {
-    logger = useStore.subscribe(console.log, slice.selectors.selectSliceState);
+    // logger = useStore.subscribe(console.log, slice.selectors.selectSliceState);
   });
 
   afterAll(() => {
@@ -153,7 +153,7 @@ describe('Testing Zustand Vanilla', () => {
   afterAll(() => {
     logger(); // unsub logger
   });
-  it('Test hydrate action', () => {
+  it('Test hydrateAll action', () => {
     const { Animal } = useStore.getState();
     Animal.actions.hydrateAll([
       {
@@ -168,11 +168,51 @@ describe('Testing Zustand Vanilla', () => {
     expect(useStore.getState().Animal.entities?.Duck?.noise).toBe('Quack');
     expect(useStore.getState().Animal.entities?.Duck?.name).toBe('Duck');
     Animal.actions.reset();
-    expect(useStore.getState().Animal.lastHydrated).toBe(null);
+    expect(useStore.getState().Animal.lastHydrated).toBeNull();
   });
 
-  it('Test update action', () => {});
+  it('Test upsertMany action', () => {
+    const { Animal } = useStore.getState();
+    Animal.actions.upsertMany([
+      {
+        name: 'Duck',
+        noise: 'Quack',
+      },
+      {
+        name: 'Cow',
+        noise: 'Moo',
+      },
+    ]);
+    let state = useStore.getState();
+    expect(state.Animal.entities?.Duck?.noise).toBe('Quack');
+    expect(state.Animal.entities?.Duck?.name).toBe('Duck');
+    expect(state.Animal.lastHydrated).toBeFalsy();
+    expect(state.Animal.lastModified).toBeTruthy();
+    Animal.actions.reset();
+    state = useStore.getState();
+    expect(state.Animal.lastHydrated).toBeNull();
+  });
 
-  it('Test set action', () => {});
+  it('Test setAll action', () => {
+    const { Animal } = useStore.getState();
+    Animal.actions.setAll([
+      {
+        name: 'Duck',
+        noise: 'Quack',
+      },
+      {
+        name: 'Cow',
+        noise: 'Moo',
+      },
+    ]);
+    let state = useStore.getState();
+    expect(state.Animal.entities?.Duck?.noise).toBe('Quack');
+    expect(state.Animal.entities?.Duck?.name).toBe('Duck');
+    expect(state.Animal.lastHydrated).toBeFalsy();
+    expect(state.Animal.lastModified).toBeTruthy();
+    Animal.actions.reset();
+    state = useStore.getState();
+    expect(useStore.getState().Animal.lastHydrated).toBeNull();
+  });
 });
 

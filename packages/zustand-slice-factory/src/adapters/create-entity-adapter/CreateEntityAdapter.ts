@@ -1,6 +1,5 @@
 import { EntitySliceState } from '../../factories/create-entity-slice/CreateEntitySlice';
 import { Comparer, EntityId, SelectIdMethod } from '../../types';
-import cloneDeep from 'lodash.clonedeep';
 
 export type Update<TEntity extends object> = {
   id: EntityId;
@@ -48,7 +47,7 @@ const createEntityAdapter = <TEntity extends object, TSliceState extends EntityS
     ? createDefaultSelectId(options.selectId)
     : options.selectId;
   const merge = (entities: TEntity[], state: TSliceState) => {
-    const newState = cloneDeep(state);
+    const newState = { ...state };
     entities.forEach(entity => {
       newState.entities[selectId(entity)] = entity;
     });
@@ -65,7 +64,7 @@ const createEntityAdapter = <TEntity extends object, TSliceState extends EntityS
   const addOne: EntityAdapterAction<TEntity, [TEntity], TSliceState> = (state, entity) => addMany(state, [entity]);
 
   const removeAll: EntityAdapterAction<TEntity, [], TSliceState> = (state) => {
-    const newState = cloneDeep(state);
+    const newState = { ...state };
     newState.ids = [];
     newState.entities = {};
 
@@ -73,7 +72,7 @@ const createEntityAdapter = <TEntity extends object, TSliceState extends EntityS
   };
 
   const removeMany: EntityAdapterAction<TEntity, [EntityId[]], TSliceState> = (state, ids) => {
-    const newState = cloneDeep(state);
+    const newState = { ...state };
     ids.forEach(id => {
       if (id in newState.entities) {
         delete newState.entities[id];
@@ -88,7 +87,7 @@ const createEntityAdapter = <TEntity extends object, TSliceState extends EntityS
   const setAll: EntityAdapterAction<TEntity, [TEntity[]], TSliceState> = (state, entities) => addMany(removeAll(state), entities);
 
   const updateMany: EntityAdapterAction<TEntity, [Update<TEntity>[]], TSliceState> = (state, updates) => {
-    const newState = cloneDeep(state);
+    const newState = { ...state };
     const updatedEntities = updates.reduce((acc, update) => {
       if (update.id in newState.entities) {
         const original = newState.entities[update.id];
@@ -119,10 +118,6 @@ const createEntityAdapter = <TEntity extends object, TSliceState extends EntityS
     {
       added: [] as TEntity[],
       updated: [] as Update<TEntity>[],
-    });
-    console.log({
-      added,
-      updated, 
     });
     return addMany(updateMany(state, updated), added);
   };

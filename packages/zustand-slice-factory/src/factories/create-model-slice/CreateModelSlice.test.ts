@@ -62,15 +62,47 @@ describe('Testing Zustand', () => {
     
     expect(sliceState.current.model?.username).toBe(PremiumProfile.model.username);
     expect(sliceState.current.model?.url).toBe(PremiumProfile.model.url);
+    expect(sliceState.current.lastHydrated).toBeTruthy();
+    expect(sliceState.current.lastModified).toBeNull();
     act(() => {
       result.current.reset();
     });
-    expect(sliceState.current.lastHydrated).toBe(null);
+    expect(sliceState.current.lastHydrated).toBeNull();
   });
 
-  it('Test update action', () => {});
+  it('Test update action', () => {
+    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    act(() => {
+      result.current.update(PremiumProfile.model);
+    });
+    
+    expect(sliceState.current.model?.username).toBe(PremiumProfile.model.username);
+    expect(sliceState.current.model?.url).toBe(PremiumProfile.model.url);
+    expect(sliceState.current.lastHydrated).toBeNull();
+    expect(sliceState.current.lastModified).toBeTruthy();
+    act(() => {
+      result.current.reset();
+    });
+    expect(sliceState.current.lastHydrated).toBeNull();
+  });
 
-  it('Test set action', () => {});
+  it('Test set action', () => {
+    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    act(() => {
+      result.current.set(PremiumProfile.model);
+    });
+    
+    expect(sliceState.current.model?.username).toBe(PremiumProfile.model.username);
+    expect(sliceState.current.model?.url).toBe(PremiumProfile.model.url);
+    expect(sliceState.current.lastHydrated).toBeNull();
+    expect(sliceState.current.lastModified).toBeTruthy();
+    act(() => {
+      result.current.reset();
+    });
+    expect(sliceState.current.lastHydrated).toBeNull();
+  });
 });
 
 describe('Testing Zustand Vanilla', () => {
