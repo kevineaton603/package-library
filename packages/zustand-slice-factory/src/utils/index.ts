@@ -9,7 +9,6 @@ export const createRecordFromArray = <T>(list: T[], keySelector: (item: T) => Re
   }), {});
 };
 
-
 /**
  * @internal
  */

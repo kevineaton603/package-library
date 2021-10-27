@@ -4,30 +4,22 @@
 import create from 'zustand';
 import createVanilla, { SetState } from 'zustand/vanilla';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { renderHook } from '@testing-library/react-hooks';
-import createModelSlice, { createActionsState, ModelSliceState } from './CreateModelSlice';
-import { Action, ModelSliceActions, ModelSliceStateActions, SetAction } from '../../types';
+import { act, renderHook } from '@testing-library/react-hooks';
+import createModelSlice, { ModelSliceSetActions, ModelSliceStateActions } from './CreateModelSlice';
+import { Action, SetAction } from '../../types';
 import { createStateActions } from '../../models/actions-state/ActionsState';
+import { PremiumProfile, TestAppState, UserProfileModel } from '../../fixtures';
 
-type DuckModel = {
-  noise: string;
-  elevation: number;
-};
+type AppState = Omit<TestAppState, 'Followers'>;
 
-const slice = createModelSlice<AppState, DuckModel>({
-  name: 'Duck',
-  selectSliceState: (appState) => appState.Duck,
+const slice = createModelSlice<AppState, UserProfileModel>({
+  name: 'User',
+  selectSliceState: (appState) => appState.User,
 });
 
-type DuckActions = ModelSliceActions<AppState, DuckModel> & { setNoise: SetAction<AppState, [string]> };
+type UserActions = ModelSliceSetActions<AppState, UserProfileModel> & { setNoise: SetAction<AppState, [string]> };
 
-type DuckStateActions = ModelSliceStateActions<DuckModel> & { setNoise: Action<[string]> };
-
-type DuckSliceState = ModelSliceState<DuckModel, DuckStateActions>;
-
-type AppState = {
-  Duck: DuckSliceState;
-};
+type UserStateActions = ModelSliceStateActions<UserProfileModel> & { setNoise: Action<[string]> };
 
 const setNoise: SetAction<AppState, [string]> = (set: SetState<AppState>) => (noise: string) => {
   return set(state => ({
@@ -44,15 +36,11 @@ const allActions = {
   setNoise: setNoise,
 };
 
-// const a: () => SetAction<AppState, [string]> = () => {
-//   return (set) => () => set() 
-// };
-
 describe('Testing Zustand', () => {
   const useStore = create<AppState>((set) => ({
-    Duck: {
+    User: {
       ...slice.state,
-      actions: createActionsState<AppState, DuckModel, DuckStateActions, DuckActions>(set, allActions),
+      actions: createStateActions<AppState, UserStateActions, UserActions>(set, allActions),
     },
   }));
 
@@ -67,14 +55,17 @@ describe('Testing Zustand', () => {
 
   it('Test hydrate action', () => {
     const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    result.current.hydrate({
-      noise: 'Quack',
-      elevation: 10000, 
+    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    act(() => {
+      result.current.hydrate(PremiumProfile.model);
     });
-    expect(useStore.getState().Duck.model?.noise).toBe('Quack');
-    expect(useStore.getState().Duck.model?.elevation).toBe(10000);
-    result.current.reset();
-    expect(useStore.getState().Duck.lastHydrated).toBe(null);
+    
+    expect(sliceState.current.model?.username).toBe(PremiumProfile.model.username);
+    expect(sliceState.current.model?.url).toBe(PremiumProfile.model.url);
+    act(() => {
+      result.current.reset();
+    });
+    expect(sliceState.current.lastHydrated).toBe(null);
   });
 
   it('Test update action', () => {});
@@ -84,9 +75,9 @@ describe('Testing Zustand', () => {
 
 describe('Testing Zustand Vanilla', () => {
   const store = createVanilla<AppState>((set) => ({
-    Duck: {
+    User: {
       ...slice.state,
-      actions: createStateActions<AppState, DuckStateActions, DuckActions>(set, allActions),
+      actions: createStateActions<AppState, UserStateActions, UserActions>(set, allActions),
     },
   }));
 
@@ -100,16 +91,13 @@ describe('Testing Zustand Vanilla', () => {
   });
 
   it('Test hydrate action', () => {
-    const { Duck } = store.getState();
-    Duck.actions.hydrate({
-      noise: 'Quack',
-      elevation: 10000, 
-    });
+    const { User } = store.getState();
+    User.actions.hydrate(PremiumProfile.model);
     
-    expect(store.getState().Duck.model?.noise).toBe('Quack');
-    expect(store.getState().Duck.model?.elevation).toBe(10000);
-    Duck.actions.reset();
-    expect(store.getState().Duck.lastHydrated).toBe(null);
+    expect(store.getState().User.model?.username).toBe(PremiumProfile.model.username);
+    expect(store.getState().User.model?.url).toBe(PremiumProfile.model.url);
+    User.actions.reset();
+    expect(store.getState().User.lastHydrated).toBe(null);
   });
 
   it('Test update action', () => {});

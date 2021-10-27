@@ -1,7 +1,22 @@
 import { createSelector } from 'reselect';
-import { SetState } from 'zustand';
 import ModelState, { ModelStateType } from '../../models/model-state';
-import { ModelSliceActions, ModelSliceSelectors, ModelSliceStateActions } from '../../types';
+import { Action, MetaSliceSelectors, SetAction, SliceSetActions, SliceSelectors, SliceStateActions } from '../../types';
+
+export type ModelSliceSelectors<TAppState extends object, TModel extends object> = SliceSelectors<TAppState, ModelStateType<TModel>, ModelSliceStateActions<TModel>> & MetaSliceSelectors<TAppState> & {
+  selectModel: (state: TAppState) => TModel;
+};
+
+export type ModelSliceSetActions<TAppState extends object, TModel extends object> = SliceSetActions<TAppState> & {
+  hydrate: SetAction<TAppState, [TModel]>;
+  set: SetAction<TAppState, [TModel]>;
+  update: SetAction<TAppState, [TModel]>;
+};
+
+export type ModelSliceStateActions<TModel extends object> = SliceStateActions & {
+  hydrate: Action<[TModel]>;
+  set: Action<[TModel]>;
+  update: Action<[TModel]>;
+};
 
 export type ModelSliceState<TModel extends object, TSliceActions extends ModelSliceStateActions<TModel> = ModelSliceStateActions<TModel>> = ModelStateType<TModel> & {
   actions: TSliceActions
@@ -9,7 +24,7 @@ export type ModelSliceState<TModel extends object, TSliceActions extends ModelSl
 
 export type ModelSlice<TAppState extends object, TModel extends object> = {
   name: keyof TAppState;
-  actions: ModelSliceActions<TAppState, TModel>;
+  actions: ModelSliceSetActions<TAppState, TModel>;
   selectors: ModelSliceSelectors<TAppState, TModel>;
   state: ModelStateType<TModel>;
 };
@@ -30,7 +45,7 @@ const createModelSlice = <TAppState extends object, TModel extends object>(optio
     selectActions: createSelector(options.selectSliceState, (model) => model.actions),
   };
 
-  const actions: ModelSliceActions<TAppState, TModel> = {
+  const actions: ModelSliceSetActions<TAppState, TModel> = {
     reset: (set) => () => set(state => ({
       ...state,
       [options.name]: {
@@ -67,20 +82,6 @@ const createModelSlice = <TAppState extends object, TModel extends object>(optio
     selectors: selectors,
     state: initialState,
   };
-};
-
-export const createActionsState = <
-  TAppState extends object,
-  TModel extends object,
-  TSliceStateActions extends ModelSliceStateActions<TModel> = ModelSliceStateActions<TModel>,
-  TModelSliceActions extends ModelSliceActions<TAppState, TModel> = ModelSliceActions<TAppState, TModel>,
->(set: SetState<TAppState>, actions: TModelSliceActions): TSliceStateActions => {
-  const entries = Object.entries(actions);
-  const newActions = entries.reduce((acc, [key, entry]) => ({
-    ...acc,
-    [key]: entry(set),
-  }), {} as TSliceStateActions);
-  return newActions;
 };
 
 export default createModelSlice;

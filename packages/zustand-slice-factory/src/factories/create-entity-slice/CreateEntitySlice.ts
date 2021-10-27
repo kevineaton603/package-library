@@ -1,9 +1,45 @@
 import { createSelector } from 'reselect';
-import createEntityAdapter, { SelectIdMethod } from '../../adapters/create-entity-adapter/CreateEntityAdapter';
+import createEntityAdapter from '../../adapters/create-entity-adapter/CreateEntityAdapter';
 import createSliceAdapter from '../../adapters/create-slice-adapter';
 import EntityState, { EntityStateType } from '../../models/entity-state';
-import { Comparer, EntityId, EntitySliceSetActions, EntitySliceSelectors, EntitySliceStateActions } from '../../types';
+import { Comparer, EntityId, SliceStateActions, Action, SliceSetActions, SetAction, SliceSelectors, Selector, MetaSliceSelectors, SelectIdMethod } from '../../types';
 import { getISOString } from '../../utils';
+
+export type EntitySliceSetActions<TAppState extends object, TEntity extends object> = SliceSetActions<TAppState> & {
+  addOne: SetAction<TAppState, [TEntity]>;
+  addMany: SetAction<TAppState, [TEntity[]]>;
+  hydrateOne: SetAction<TAppState, [TEntity]>
+  hydrateMany: SetAction<TAppState, [TEntity[]]>;
+  hydrateAll: SetAction<TAppState, [TEntity[]]>;
+  upsertOne: SetAction<TAppState, [TEntity]>;
+  upsertMany: SetAction<TAppState, [TEntity[]]>;
+  removeOne: SetAction<TAppState, [EntityId]>;
+  removeMany: SetAction<TAppState, [EntityId[]]>;
+  removeAll: SetAction<TAppState>;
+  setAll: SetAction<TAppState, [TEntity[]]>;
+};
+
+export type EntitySliceStateActions<TEntity extends object> = SliceStateActions & {
+  addOne: Action<[TEntity]>;
+  addMany: Action<[TEntity[]]>;
+  hydrateOne: Action<[TEntity]>
+  hydrateMany: Action<[TEntity[]]>;
+  hydrateAll: Action<[TEntity[]]>;
+  upsertOne: Action<[TEntity]>;
+  upsertMany: Action<[TEntity[]]>;
+  removeOne: Action<[EntityId]>;
+  removeMany: Action<[EntityId[]]>;
+  removeAll: Action;
+  setAll: Action<[TEntity[]]>;
+};
+
+export type EntitySliceSelectors<TAppState extends object, TEntity extends object> = SliceSelectors<TAppState, EntityStateType<TEntity>, EntitySliceStateActions<TEntity>> & MetaSliceSelectors<TAppState> & {
+  selectIds: Selector<TAppState, EntityId[]>;
+  selectEntities: Selector<TAppState, Record<EntityId, TEntity>>;
+  selectAll: Selector<TAppState, TEntity[]>;
+  selectTotal: Selector<TAppState, number>;
+  selectById: Selector<TAppState, TEntity | undefined, [EntityId]>;
+};
 
 type EntitySliceOptions<TAppState extends object, TModel extends object> = {
   name: keyof TAppState;

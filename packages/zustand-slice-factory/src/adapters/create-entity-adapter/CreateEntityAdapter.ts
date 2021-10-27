@@ -1,13 +1,11 @@
 import { EntitySliceState } from '../../factories/create-entity-slice/CreateEntitySlice';
-import { Comparer, EntityId } from '../../types';
+import { Comparer, EntityId, SelectIdMethod } from '../../types';
 import cloneDeep from 'lodash.clonedeep';
 
 export type Update<TEntity extends object> = {
   id: EntityId;
   changes: Partial<TEntity>;
 };
-
-export type SelectIdMethod<TEntity extends object> = (model: TEntity) => EntityId;
 
 const createDefaultSelectId = <TEntity extends object>(key: keyof TEntity): SelectIdMethod<TEntity> => (entity: TEntity) => {
   const value = entity[key];
@@ -106,7 +104,7 @@ const createEntityAdapter = <TEntity extends object, TSliceState extends EntityS
   const updateOne: EntityAdapterAction<TEntity, [Update<TEntity>], TSliceState> = (state, update) => updateMany(state, [update]);
 
   const upsertMany: EntityAdapterAction<TEntity, [TEntity[]], TSliceState> = (state, entities) => {
-    const { added, updated } = entities.reduce((acc, entity) => state.entities?.[selectId(entity)]
+    const { added, updated } = entities.reduce((acc, entity) => !state.entities?.[selectId(entity)]
       ? {
         ...acc,
         added: [...acc.added, entity], 
@@ -121,6 +119,10 @@ const createEntityAdapter = <TEntity extends object, TSliceState extends EntityS
     {
       added: [] as TEntity[],
       updated: [] as Update<TEntity>[],
+    });
+    console.log({
+      added,
+      updated, 
     });
     return addMany(updateMany(state, updated), added);
   };

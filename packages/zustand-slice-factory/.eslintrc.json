@@ -7,7 +7,6 @@
     },
     "extends": [
         "plugin:react/recommended",
-        // "airbnb",
         "airbnb-typescript"
     ],
     "parser": "@typescript-eslint/parser",
@@ -44,6 +43,8 @@
                 "consistent": true,
                 "multiline": true
             }
-        }]
+        }],
+        "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1 }],
+        "eol-last": ["error", "always"]
     }
 }

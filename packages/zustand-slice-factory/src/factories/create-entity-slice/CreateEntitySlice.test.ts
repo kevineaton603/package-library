@@ -1,12 +1,11 @@
 /**
  * @jest-environment jsdom
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import create from 'zustand';
 import createVanilla from 'zustand/vanilla';
-import { EntitySliceSetActions, EntitySliceStateActions } from '../..';
 import { createStateActions } from '../../models/actions-state/ActionsState';
-import createEntitySlice, { EntitySliceState } from './CreateEntitySlice';
+import createEntitySlice, { EntitySliceState, EntitySliceSetActions, EntitySliceStateActions } from './CreateEntitySlice';
 
 type AnimalModel = {
   name: string;
@@ -49,34 +48,93 @@ describe('Testing Zustand', () => {
 
   let logger = () => {};
   beforeAll(() => {
-    // logger = useStore.subscribe(console.log, slice.selectors.selectSliceState);
+    logger = useStore.subscribe(console.log, slice.selectors.selectSliceState);
   });
 
   afterAll(() => {
     logger(); // unsub logger
   });
 
-  it('Test hydrate action', () => {
+  it('Test hydrateAll action', () => {
     const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    result.current.hydrateAll([
-      {
-        name: 'Duck',
-        noise: 'Quack',
-      },
-      {
-        name: 'Cow',
-        noise: 'Moo',
-      },
-    ]);
-    expect(useStore.getState().Animal.entities?.Duck?.noise).toBe('Quack');
-    expect(useStore.getState().Animal.entities?.Duck?.name).toBe('Duck');
-    result.current.reset();
-    expect(useStore.getState().Animal.lastHydrated).toBe(null);
+    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    act(() => {
+      result.current.hydrateAll([
+        {
+          name: 'Duck',
+          noise: 'Quack',
+        },
+        {
+          name: 'Cow',
+          noise: 'Moo',
+        },
+      ]);
+    });
+
+    expect(sliceState.current.entities?.Duck?.noise).toBe('Quack');
+    expect(sliceState.current.entities?.Duck?.name).toBe('Duck');
+    expect(sliceState.current.lastHydrated).toBeTruthy();
+    expect(sliceState.current.lastModified).toBeNull();
+    act(() => {
+      result.current.reset();
+    });
+    expect(sliceState.current.lastHydrated).toBeNull();
+    expect(sliceState.current.lastModified).toBeNull();
   });
 
-  it('Test update action', () => {});
+  it('Test updateMany action', () => {
+    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    act(() => {
+      result.current.upsertMany([
+        {
+          name: 'Duck',
+          noise: 'Quack',
+        },
+        {
+          name: 'Cow',
+          noise: 'Moo',
+        },
+      ]);
+    });
 
-  it('Test set action', () => {});
+    expect(sliceState.current.entities?.Duck?.noise).toBe('Quack');
+    expect(sliceState.current.entities?.Duck?.name).toBe('Duck');
+    expect(sliceState.current.lastModified).toBeTruthy();
+    expect(sliceState.current.lastHydrated).toBeNull();
+    act(() => {
+      result.current.reset();
+    });
+    expect(sliceState.current.lastHydrated).toBeNull();
+    expect(sliceState.current.lastModified).toBeNull();
+  });
+
+  it('Test setAll action', () => {
+    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    act(() => {
+      result.current.setAll([
+        {
+          name: 'Duck',
+          noise: 'Quack',
+        },
+        {
+          name: 'Cow',
+          noise: 'Moo',
+        },
+      ]);
+    });
+
+    expect(sliceState.current.entities?.Duck?.noise).toBe('Quack');
+    expect(sliceState.current.entities?.Duck?.name).toBe('Duck');
+    expect(sliceState.current.lastModified).toBeTruthy();
+    expect(sliceState.current.lastHydrated).toBeNull();
+    act(() => {
+      result.current.reset();
+    });
+    expect(sliceState.current.lastHydrated).toBeNull();
+    expect(sliceState.current.lastModified).toBeNull();
+  });
 });
 
 describe('Testing Zustand Vanilla', () => {
