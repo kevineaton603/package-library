@@ -4,7 +4,11 @@ import { Action, MetaSliceSelectors, SetAction, SliceSetActions, SliceSelectors,
 import createSliceAdapter from '../../adapters/create-slice-adapter';
 import { getISOString } from '../../utils';
 
-export type ModelSliceSelectors<TAppState extends object, TModel extends object> = SliceSelectors<TAppState, ModelStateType<TModel>, ModelSliceStateActions<TModel>> & MetaSliceSelectors<TAppState> & {
+export type ModelSliceSelectors<
+  TAppState extends object,
+  TModel extends object,
+  TSliceActions extends ModelSliceStateActions<TModel> = ModelSliceStateActions<TModel>,
+> = SliceSelectors<TAppState, ModelStateType<TModel>, TSliceActions> & MetaSliceSelectors<TAppState> & {
   selectModel: (state: TAppState) => TModel;
 };
 
@@ -24,18 +28,26 @@ export type ModelSliceState<TModel extends object, TSliceActions extends ModelSl
   actions: TSliceActions
 };
 
-export type ModelSlice<TAppState extends object, TModel extends object> = {
+export type ModelSlice<
+  TAppState extends object,
+  TModel extends object,
+  TSliceActions extends ModelSliceStateActions<TModel> = ModelSliceStateActions<TModel>,
+> = {
   name: keyof TAppState;
   actions: ModelSliceSetActions<TAppState, TModel>;
-  selectors: ModelSliceSelectors<TAppState, TModel>;
+  selectors: ModelSliceSelectors<TAppState, TModel, TSliceActions>;
   state: ModelStateType<TModel>;
 };
 
-const createModelSlice = <TAppState extends object, TModel extends object>(options: {
-  name: keyof TAppState;
-  selectSliceState: (appState: TAppState) => ModelSliceState<TModel>
-  initialState?: Partial<ModelStateType<TModel>>
-}): ModelSlice<TAppState, TModel> => {
+const createModelSlice = <
+  TAppState extends object,
+  TModel extends object,
+  TSliceActions extends ModelSliceStateActions<TModel> = ModelSliceStateActions<TModel>,
+>(options: {
+    name: keyof TAppState;
+    selectSliceState: (appState: TAppState) => ModelSliceState<TModel, TSliceActions>
+    initialState?: Partial<ModelStateType<TModel>>
+  }): ModelSlice<TAppState, TModel, TSliceActions> => {
 
   const initialState = ModelState.create(options?.initialState);
 

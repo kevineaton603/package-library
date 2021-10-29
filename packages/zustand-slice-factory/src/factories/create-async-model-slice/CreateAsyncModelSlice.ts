@@ -4,10 +4,14 @@ import AsyncModelState, { AsyncModelStateType } from '../../models/async-model-s
 import { Action, AsyncMetaSliceSelectors, AsyncSliceStateActions, AsyncSliceSetActions, SetAction, SliceSelectors } from '../../types';
 import { getISOString } from '../../utils';
 
-export type AsyncModelSliceSelectors<TAppState extends object, TModel extends object, TError extends Error = Error> =
-  SliceSelectors<TAppState, AsyncModelStateType<TModel, TError>, AsyncModelSliceStateActions<TModel, TError>> & AsyncMetaSliceSelectors<TAppState, TError> & {
-    selectModel: (state: TAppState) => TModel;
-  };
+export type AsyncModelSliceSelectors<
+  TAppState extends object, 
+  TModel extends object,
+  TError extends Error = Error,
+  TSliceStateActions extends AsyncModelSliceStateActions<TModel, TError> = AsyncModelSliceStateActions<TModel, TError>,
+> = SliceSelectors<TAppState, AsyncModelStateType<TModel, TError>, TSliceStateActions> & AsyncMetaSliceSelectors<TAppState, TError> & {
+  selectModel: (state: TAppState) => TModel;
+};
 
 export type AsyncModelSliceSetActions<TAppState extends object, TModel extends object, TError extends Error = Error> = 
   AsyncSliceSetActions<TAppState, TError> & {
@@ -23,26 +27,29 @@ export type AsyncModelSliceStateActions<TModel extends object, TError extends Er
     update: Action<[TModel]>;
   };
 
-export type AsyncModelSliceState<TModel extends object, TError extends Error = Error, TSliceActions extends AsyncModelSliceStateActions<TModel, TError> = AsyncModelSliceStateActions<TModel, TError>> = 
-  AsyncModelStateType<TModel, TError> & {
-    actions: TSliceActions
-  };
+export type AsyncModelSliceState<
+  TModel extends object,
+  TError extends Error = Error,
+  TSliceActions extends AsyncModelSliceStateActions<TModel, TError> = AsyncModelSliceStateActions<TModel, TError>,
+> = AsyncModelStateType<TModel, TError> & {
+  actions: TSliceActions
+};
 
-export type AsyncModelSlice<TAppState extends object, TModel extends object, TError extends Error = Error> = {
+export type AsyncModelSlice<TAppState extends object, TModel extends object, TError extends Error = Error, TSliceSetActions extends AsyncModelSliceStateActions<TModel, TError> = AsyncModelSliceStateActions<TModel, TError>> = {
   name: keyof TAppState;
   actions: AsyncModelSliceSetActions<TAppState, TModel, TError>;
-  selectors: AsyncModelSliceSelectors<TAppState, TModel, TError>;
+  selectors: AsyncModelSliceSelectors<TAppState, TModel, TError, TSliceSetActions>;
   state: AsyncModelStateType<TModel, TError>;
 };
 
-const createAsyncModelSlice = <TAppState extends object, TModel extends object, TError extends Error = Error>(options: {
+const createAsyncModelSlice = <TAppState extends object, TModel extends object, TError extends Error = Error, TSliceStateActions extends AsyncModelSliceStateActions<TModel, TError> = AsyncModelSliceStateActions<TModel, TError>>(options: {
   name: keyof TAppState;
-  selectSliceState: (appState: TAppState) => AsyncModelSliceState<TModel, TError>
+  selectSliceState: (appState: TAppState) => AsyncModelSliceState<TModel, TError, TSliceStateActions>
   initialState?: Partial<AsyncModelStateType<TModel, TError>>
-}): AsyncModelSlice<TAppState, TModel, TError> => {
+}): AsyncModelSlice<TAppState, TModel, TError, TSliceStateActions> => {
   const initialState = AsyncModelState.create(options.initialState);
 
-  const selectors: AsyncModelSliceSelectors<TAppState, TModel, TError> = {
+  const selectors: AsyncModelSliceSelectors<TAppState, TModel, TError, TSliceStateActions> = {
     selectActions: createSelector(options.selectSliceState, (model) => model.actions),
     selectSliceState: createSelector(options.selectSliceState, (model) => model),
     selectModel: createSelector(options.selectSliceState, (model) => model.model),

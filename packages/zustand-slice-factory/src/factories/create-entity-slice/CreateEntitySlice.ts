@@ -33,7 +33,11 @@ export type EntitySliceStateActions<TEntity extends object> = SliceStateActions 
   setAll: Action<[TEntity[]]>;
 };
 
-export type EntitySliceSelectors<TAppState extends object, TEntity extends object> = SliceSelectors<TAppState, EntityStateType<TEntity>, EntitySliceStateActions<TEntity>> & MetaSliceSelectors<TAppState> & {
+export type EntitySliceSelectors<
+  TAppState extends object,
+  TEntity extends object,
+  TSliceActions extends EntitySliceStateActions<TEntity> = EntitySliceStateActions<TEntity>,
+> = SliceSelectors<TAppState, EntityStateType<TEntity>, TSliceActions> & MetaSliceSelectors<TAppState> & {
   selectIds: Selector<TAppState, EntityId[]>;
   selectEntities: Selector<TAppState, Record<EntityId, TEntity>>;
   selectAll: Selector<TAppState, TEntity[]>;
@@ -41,28 +45,40 @@ export type EntitySliceSelectors<TAppState extends object, TEntity extends objec
   selectById: Selector<TAppState, TEntity | undefined, [EntityId]>;
 };
 
-type EntitySliceOptions<TAppState extends object, TModel extends object> = {
+type EntitySliceOptions<
+  TAppState extends object,
+  TEntity extends object,
+  TSliceActions extends EntitySliceStateActions<TEntity> = EntitySliceStateActions<TEntity>,
+> = {
   name: keyof TAppState;
-  selectSliceState: (appState: TAppState) => EntitySliceState<TModel>;
-  selectId: SelectIdMethod<TModel> | keyof TModel;
-  sortComparer: Comparer<TModel>; // | false;
-  initialState?: Partial<EntityStateType<TModel>>;
+  selectSliceState: (appState: TAppState) => EntitySliceState<TEntity, TSliceActions>;
+  selectId: SelectIdMethod<TEntity> | keyof TEntity;
+  sortComparer: Comparer<TEntity>; // | false;
+  initialState?: Partial<EntityStateType<TEntity>>;
 };
 
 export type EntitySliceState<TModel extends object, TSliceActions extends EntitySliceStateActions<TModel> = EntitySliceStateActions<TModel>> = EntityStateType<TModel> & {
   actions: TSliceActions
 };
 
-export type EntitySlice<TAppState extends object, TModel extends object> = {
+export type EntitySlice<
+  TAppState extends object,
+  TEntity extends object,
+  TSliceActions extends EntitySliceStateActions<TEntity> = EntitySliceStateActions<TEntity>,
+> = {
   name: keyof TAppState;
-  actions: EntitySliceSetActions<TAppState, TModel>;
-  selectors: EntitySliceSelectors<TAppState, TModel>;
-  state: EntityStateType<TModel>;
+  actions: EntitySliceSetActions<TAppState, TEntity>;
+  selectors: EntitySliceSelectors<TAppState, TEntity, TSliceActions>;
+  state: EntityStateType<TEntity>;
 };
 
-const createEntitySlice = <TAppState extends object, TEntity extends object>(options: EntitySliceOptions<TAppState, TEntity>) : EntitySlice<TAppState, TEntity>  => {
+const createEntitySlice = <
+  TAppState extends object,
+  TEntity extends object,
+  TSliceActions extends EntitySliceStateActions<TEntity> = EntitySliceStateActions<TEntity>,
+>(options: EntitySliceOptions<TAppState, TEntity, TSliceActions>) : EntitySlice<TAppState, TEntity, TSliceActions>  => {
 
-  const selectors: EntitySliceSelectors<TAppState, TEntity> = {
+  const selectors: EntitySliceSelectors<TAppState, TEntity, TSliceActions> = {
     selectSliceState: createSelector(options.selectSliceState, (model) => model),
     selectActions: createSelector(options.selectSliceState, (model) => model.actions),
     selectEntities: createSelector(options.selectSliceState, (model) => model.entities),

@@ -6,11 +6,9 @@ export type Comparer<TModel> = (a: TModel, b: TModel) => number;
 
 export type EntityId = number | string;
 
-export type Action<TArguments extends any[] = undefined[]> = (...args: TArguments) => void;
+export type Action<TArguments extends any[] = undefined[], TReturn extends void | Promise<void> = void> = (...args: TArguments) => TReturn;
 
-export type ActionAsync<TArguments extends any[] = undefined[]> = (...args: TArguments) => Promise<void>;
-
-export type SetAction<TAppState extends object, TArguments extends any[] = undefined[]> = (set: SetState<TAppState>) => Action<TArguments>;
+export type SetAction<TAppState extends object, TArguments extends any[] = undefined[], TReturn extends void | Promise<void> = void> = (set: SetState<TAppState>) => Action<TArguments, TReturn>;
 
 export type Selector<TAppState extends object, TReturnType, TArguments extends any[] = undefined[]> = TArguments extends undefined[]
   ? (appState: TAppState) => TReturnType
@@ -45,7 +43,7 @@ export type AsyncSliceStateActions<TError extends Error = Error> = SliceStateAct
 };
 
 export type AsyncSliceSetActions<TAppState extends object, TError extends Error = Error> = SliceSetActions<TAppState> & {
-  setError: SetAction<TAppState, [TError]>;
+  setError: SetAction<TAppState, [TError | null]>;
   setStatus: SetAction<TAppState, [StatusEnum]>;
 };
 

@@ -33,39 +33,60 @@ export type AsyncEntitySliceStateActions<TEntity extends object, TError extends 
   setAll: Action<[TEntity[]]>;
 };
 
-export type AsyncEntitySliceState<TModel extends object, TError extends Error = Error, TSliceActions extends AsyncEntitySliceStateActions<TModel, TError> = AsyncEntitySliceStateActions<TModel, TError>> = 
-  AsyncEntityStateType<TModel, TError> & {
-    actions: TSliceActions
-  };
-
-export type AsyncEntitySliceSelectors<TAppState extends object, TEntity extends object, TError extends Error = Error> = 
-  SliceSelectors<TAppState, AsyncEntityStateType<TEntity, TError>, AsyncEntitySliceStateActions<TEntity, TError>> & AsyncMetaSliceSelectors<TAppState, TError> & {
-    selectIds: Selector<TAppState, EntityId[]>;
-    selectEntities: Selector<TAppState, Record<EntityId, TEntity>>;
-    selectAll: Selector<TAppState, TEntity[]>;
-    selectTotal: Selector<TAppState, number>;
-    selectById: Selector<TAppState, TEntity | undefined, [EntityId]>;
-  };
-
-type AsyncEntitySliceOptions<TAppState extends object, TModel extends object, TError extends Error = Error> = {
-  name: keyof TAppState;
-  selectSliceState: (appState: TAppState) => AsyncEntitySliceState<TModel, TError>;
-  selectId: SelectIdMethod<TModel> | keyof TModel;
-  sortComparer: Comparer<TModel>; // | false;
-  initialState?: Partial<AsyncEntityStateType<TModel, TError>>;
+export type AsyncEntitySliceState<
+  TModel extends object,
+  TError extends Error = Error,
+  TSliceActions extends AsyncEntitySliceStateActions<TModel, TError> = AsyncEntitySliceStateActions<TModel, TError>,
+> = AsyncEntityStateType<TModel, TError> & {
+  actions: TSliceActions
 };
 
-export type AsyncModelSlice<TAppState extends object, TModel extends object, TError extends Error = Error> = {
-  name: keyof TAppState;
-  actions: AsyncEntitySliceSetActions<TAppState, TModel, TError>;
-  selectors: AsyncEntitySliceSelectors<TAppState, TModel, TError>;
-  state: AsyncEntityStateType<TModel, TError>;
+export type AsyncEntitySliceSelectors<
+  TAppState extends object,
+  TEntity extends object,
+  TError extends Error = Error,
+  TSliceActions extends AsyncEntitySliceStateActions<TEntity, TError> = AsyncEntitySliceStateActions<TEntity, TError>,
+> = SliceSelectors<TAppState, AsyncEntityStateType<TEntity, TError>, TSliceActions> & AsyncMetaSliceSelectors<TAppState, TError> & {
+  selectIds: Selector<TAppState, EntityId[]>;
+  selectEntities: Selector<TAppState, Record<EntityId, TEntity>>;
+  selectAll: Selector<TAppState, TEntity[]>;
+  selectTotal: Selector<TAppState, number>;
+  selectById: Selector<TAppState, TEntity | undefined, [EntityId]>;
 };
 
-const createAsyncEntitySlice = <TAppState extends object, TEntity extends object, TError extends Error = Error>(options: AsyncEntitySliceOptions<TAppState, TEntity, TError>): AsyncModelSlice<TAppState, TEntity, TError> => {
+type AsyncEntitySliceOptions<
+  TAppState extends object,
+  TEntity extends object,
+  TError extends Error = Error,
+  TSliceActions extends AsyncEntitySliceStateActions<TEntity, TError> = AsyncEntitySliceStateActions<TEntity, TError>,
+> = {
+  name: keyof TAppState;
+  selectSliceState: (appState: TAppState) => AsyncEntitySliceState<TEntity, TError, TSliceActions>;
+  selectId: SelectIdMethod<TEntity> | keyof TEntity;
+  sortComparer: Comparer<TEntity>; // | false;
+  initialState?: Partial<AsyncEntityStateType<TEntity, TError>>;
+};
+
+export type AsyncEntitySlice<
+  TAppState extends object,
+  TEntity extends object,
+  TError extends Error = Error,
+  TSliceActions extends AsyncEntitySliceStateActions<TEntity, TError> = AsyncEntitySliceStateActions<TEntity, TError>> = {
+    name: keyof TAppState;
+    actions: AsyncEntitySliceSetActions<TAppState, TEntity, TError>;
+    selectors: AsyncEntitySliceSelectors<TAppState, TEntity, TError, TSliceActions>;
+    state: AsyncEntityStateType<TEntity, TError>;
+  };
+
+const createAsyncEntitySlice = <
+  TAppState extends object,
+  TEntity extends object,
+  TError extends Error = Error,
+  TSliceActions extends AsyncEntitySliceStateActions<TEntity, TError> = AsyncEntitySliceStateActions<TEntity, TError>,
+>(options: AsyncEntitySliceOptions<TAppState, TEntity, TError, TSliceActions>): AsyncEntitySlice<TAppState, TEntity, TError, TSliceActions> => {
   const initialState = AsyncEntityState.create<TEntity, TError>(options.initialState);
 
-  const selectors: AsyncEntitySliceSelectors<TAppState, TEntity, TError> = {
+  const selectors: AsyncEntitySliceSelectors<TAppState, TEntity, TError, TSliceActions> = {
     selectSliceState: createSelector(options.selectSliceState, (model) => model),
     selectActions: createSelector(options.selectSliceState, (model) => model.actions),
     selectEntities: createSelector(options.selectSliceState, (model) => model.entities),
