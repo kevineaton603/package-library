@@ -1,3 +1,4 @@
+import { AsyncModelSliceState } from '../factories/create-async-model-slice';
 import { EntitySliceState } from '../factories/create-entity-slice/CreateEntitySlice';
 import { ModelSliceState } from '../factories/create-model-slice/CreateModelSlice';
 
@@ -16,6 +17,8 @@ export type UserProfileModel = {
 export type UserProfileEntityState = EntitySliceState<UserProfileModel>;
 
 export type UserProfileModelState = ModelSliceState<UserProfileModel>;
+
+export type UserProfileAsyncModelState = AsyncModelSliceState<UserProfileModel>;
 
 export type TestAppState = {
   User: UserProfileModelState;

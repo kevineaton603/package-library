@@ -4,5 +4,5 @@ export type {
   AsyncEntitySliceSetActions,
   AsyncEntitySliceState,
   AsyncEntitySliceStateActions,
-  AsyncModelSlice,
+  AsyncEntitySlice as AsyncModelSlice,
 } from './CreateAsyncEntitySlice';
