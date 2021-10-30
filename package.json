@@ -5,6 +5,10 @@
     "lerna": "^4.0.0"
   },
   "scripts": {
-    "test": "lerna run test"
+    "diff": "lerna diff",
+    "test": "lerna run test",
+    "lint": "lerna run lint",
+    "list": "lerna list",
+    "new-version": "lerna version"
   }
 }
