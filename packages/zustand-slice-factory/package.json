@@ -7,26 +7,33 @@
     "dist",
     "src"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevineaton603/package-library.git"
+  },
   "engines": {
     "node": ">=10"
   },
   "scripts": {
-    "start": "tsdx watch",
     "build": "node ./esbuild.config.js",
+    "build:clean": "rimraf ./dist",
     "test": "jest",
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint \"src/**\" --fix",
-    "prepare": "node ./esbuild.config.js",
+    "prepare": "husky intall && node ./esbuild.config.js",
     "size": "size-limit",
     "analyze": "size-limit --why",
-    "setup:clean": "rimraf ./node_modules"
+    "setup:clean": "rimraf ./node_modules",
+    "setup:install": "npm install",
+    "setup:clean-install": "npm ci"
+
   },
   "peerDependencies": {
     "react": ">=16"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "tsdx lint"
+      "pre-commit": "npm run lint"
     }
   },
   "prettier": {
