@@ -1,6 +1,8 @@
 import { createSelector } from 'reselect';
+import { SetState } from 'zustand';
 import createEntityAdapter from '../../adapters/create-entity-adapter';
 import createSliceAdapter from '../../adapters/create-slice-adapter';
+import { createStateActions } from '../../models/actions-state/ActionsState';
 import AsyncEntityState, { AsyncEntityStateType } from '../../models/async-entity-state';
 import { Action, AsyncMetaSliceSelectors, AsyncSliceSetActions, AsyncSliceStateActions, Comparer, EntityId, SelectIdMethod, Selector, SetAction, SliceSelectors } from '../../types';
 import { getISOString } from '../../utils';
@@ -77,6 +79,17 @@ export type AsyncEntitySlice<
     selectors: AsyncEntitySliceSelectors<TAppState, TEntity, TError, TSliceActions>;
     state: AsyncEntityStateType<TEntity, TError>;
   };
+
+export const createAsyncEntitySliceState = <
+  TAppState extends object,
+  TModel extends object,
+  TError extends Error = Error,
+  TSliceStateActions extends AsyncEntitySliceStateActions<TModel, TError> = AsyncEntitySliceStateActions<TModel, TError>,
+  TSliceSetActions extends AsyncEntitySliceSetActions<TAppState, TModel, TError> = AsyncEntitySliceSetActions<TAppState, TModel, TError>,
+>(set: SetState<TAppState>, state: AsyncEntityStateType<TModel, TError>, actions: TSliceSetActions): AsyncEntitySliceState<TModel, TError, TSliceStateActions> => ({
+    ...state,
+    actions: createStateActions<TAppState, TSliceStateActions, TSliceSetActions>(set, actions),
+  });
 
 const createAsyncEntitySlice = <
   TAppState extends object,

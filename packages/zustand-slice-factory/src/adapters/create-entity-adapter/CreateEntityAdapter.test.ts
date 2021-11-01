@@ -1,41 +1,23 @@
-import { AdminProfile, BasicProfile, PremiumProfile, TestAppState, UserProfileModel } from '../../fixtures';
-import { createRecordFromArray } from '../../utils';
+/**
+ * @jest-environment jsdom
+ */
+import { act, renderHook } from '@testing-library/react-hooks';
+import { AdminProfile, BasicProfile, PremiumProfile, UserProfileModel } from '../../fixtures/models/UserProfile';
+import useTestStore from '../../fixtures/store/useTestStore';
 import createEntityAdapter from './CreateEntityAdapter';
 
-const state: TestAppState = {
-  User: PremiumProfile,
-  Followers: {
-    ids: [AdminProfile.model.username, BasicProfile.model.username],
-    entities: createRecordFromArray([AdminProfile.model, BasicProfile.model], (model) => model.username),
-    lastHydrated: null,
-    lastModified: null,
-    actions: {
-      addMany: () => {},
-      addOne: () => {},
-      hydrateAll: () => {},
-      hydrateMany: () => {},
-      hydrateOne: () => {},
-      removeAll: () => {},
-      removeMany: () => {},
-      removeOne: () => {},
-      reset: () => {},
-      setAll: () => {},
-      upsertMany: () => {},
-      upsertOne: () => {},
-    },
-  },
-};
-
 describe('Testing EntityAdapter', () => {
+  const { result } = renderHook(() => useTestStore());
   it('Use SelectIdMethod', () => {
     const adapter = createEntityAdapter<UserProfileModel>({
       selectId: (model) => model.username,
       sortComparer: (modelA, modelB) => modelA.username.localeCompare(modelB.username),
     });
 
-    const newSliceState = adapter.setAll(state.Followers, [AdminProfile.model, BasicProfile.model, PremiumProfile.model]);
-
-    expect(newSliceState.ids.length).toBe(3);
+    act(() => {
+      const newSliceState = adapter.setAll(result.current.Followers, [AdminProfile, BasicProfile, PremiumProfile]);
+      expect(newSliceState.ids.length).toBe(3);
+    });
 
   });
 
@@ -44,9 +26,9 @@ describe('Testing EntityAdapter', () => {
       selectId: 'username',
       sortComparer: (modelA, modelB) => modelA.username.localeCompare(modelB.username),
     });
-
-    const newSliceState = adapter.setAll(state.Followers, [AdminProfile.model, BasicProfile.model, PremiumProfile.model]);
-
-    expect(newSliceState.ids.length).toBe(3);
+    act(() => {
+      const newSliceState = adapter.setAll(result.current.Followers, [AdminProfile, BasicProfile, PremiumProfile]);
+      expect(newSliceState.ids.length).toBe(3);
+    });
   });
 });

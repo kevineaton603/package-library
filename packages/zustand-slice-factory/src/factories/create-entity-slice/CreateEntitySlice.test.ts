@@ -2,49 +2,10 @@
  * @jest-environment jsdom
  */
 import { act, renderHook } from '@testing-library/react-hooks';
-import create from 'zustand';
-import createVanilla from 'zustand/vanilla';
-import { createStateActions } from '../../models/actions-state/ActionsState';
-import createEntitySlice, { EntitySliceState, EntitySliceSetActions, EntitySliceStateActions } from './CreateEntitySlice';
-
-type AnimalModel = {
-  name: string;
-  noise: string;
-};
-
-const slice = createEntitySlice<AppState, AnimalModel>({
-  name: 'Animal',
-  selectSliceState: (appState) => appState.Animal,
-  selectId: (entity) => {
-    if (!entity.name) {
-      throw new Error('Missing required property: name');
-    }
-    return entity.name;
-  },
-  sortComparer: (entityA, entityB) => {
-    if (!entityA.name) {
-      throw new Error('Missing required property: name');
-    }
-    if (!entityB.name) {
-      throw new Error('Missing required property: name');
-    }
-    return entityA.name.localeCompare(entityA.name);
-  },
-});
-
-type AnimalSliceState = EntitySliceState<AnimalModel>;
-
-type AppState = {
-  Animal: AnimalSliceState;
-};
+import AlertsDuck from '../../fixtures/features/AlertDuck';
+import useTestStore, { useTestVanillaStore } from '../../fixtures/store/useTestStore';
 
 describe('Testing Zustand', () => {
-  const useStore = create<AppState>((set) => ({
-    Animal: {
-      ...slice.state,
-      actions: createStateActions<AppState, EntitySliceStateActions<AnimalModel>, EntitySliceSetActions<AppState, AnimalModel>>(set, slice.actions),
-    },
-  }));
 
   let logger = () => {};
   beforeAll(() => {
@@ -56,23 +17,33 @@ describe('Testing Zustand', () => {
   });
 
   it('Test hydrateAll action', () => {
-    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    const { result } = renderHook(() => useTestStore(AlertsDuck.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useTestStore(AlertsDuck.selectors.selectSliceState));
     act(() => {
       result.current.hydrateAll([
         {
-          name: 'Duck',
-          noise: 'Quack',
+          id: '1',
+          message: 'Success',
+          open: true,
+          severity: 'success',
         },
         {
-          name: 'Cow',
-          noise: 'Moo',
+          id: '2',
+          message: 'Warning',
+          open: true,
+          severity: 'warning',
+        },
+        {
+          id: '3',
+          message: 'Error',
+          open: true,
+          severity: 'error',
         },
       ]);
     });
 
-    expect(sliceState.current.entities?.Duck?.noise).toBe('Quack');
-    expect(sliceState.current.entities?.Duck?.name).toBe('Duck');
+    expect(sliceState.current.entities?.['1'].message).toBe('Success');
+    expect(sliceState.current.entities?.['1']?.open).toBe(true);
     expect(sliceState.current.lastHydrated).toBeTruthy();
     expect(sliceState.current.lastModified).toBeNull();
     act(() => {
@@ -83,23 +54,33 @@ describe('Testing Zustand', () => {
   });
 
   it('Test updateMany action', () => {
-    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    const { result } = renderHook(() => useTestStore(AlertsDuck.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useTestStore(AlertsDuck.selectors.selectSliceState));
     act(() => {
       result.current.upsertMany([
         {
-          name: 'Duck',
-          noise: 'Quack',
+          id: '1',
+          message: 'Success',
+          open: true,
+          severity: 'success',
         },
         {
-          name: 'Cow',
-          noise: 'Moo',
+          id: '2',
+          message: 'Warning',
+          open: true,
+          severity: 'warning',
+        },
+        {
+          id: '3',
+          message: 'Error',
+          open: true,
+          severity: 'error',
         },
       ]);
     });
 
-    expect(sliceState.current.entities?.Duck?.noise).toBe('Quack');
-    expect(sliceState.current.entities?.Duck?.name).toBe('Duck');
+    expect(sliceState.current.entities?.['1'].message).toBe('Success');
+    expect(sliceState.current.entities?.['1']?.open).toBe(true);
     expect(sliceState.current.lastModified).toBeTruthy();
     expect(sliceState.current.lastHydrated).toBeNull();
     act(() => {
@@ -110,23 +91,33 @@ describe('Testing Zustand', () => {
   });
 
   it('Test setAll action', () => {
-    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    const { result } = renderHook(() => useTestStore(AlertsDuck.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useTestStore(AlertsDuck.selectors.selectSliceState));
     act(() => {
       result.current.setAll([
         {
-          name: 'Duck',
-          noise: 'Quack',
+          id: '1',
+          message: 'Success',
+          open: true,
+          severity: 'success',
         },
         {
-          name: 'Cow',
-          noise: 'Moo',
+          id: '2',
+          message: 'Warning',
+          open: true,
+          severity: 'warning',
+        },
+        {
+          id: '3',
+          message: 'Error',
+          open: true,
+          severity: 'error',
         },
       ]);
     });
 
-    expect(sliceState.current.entities?.Duck?.noise).toBe('Quack');
-    expect(sliceState.current.entities?.Duck?.name).toBe('Duck');
+    expect(sliceState.current.entities?.['1'].message).toBe('Success');
+    expect(sliceState.current.entities?.['1']?.open).toBe(true);
     expect(sliceState.current.lastModified).toBeTruthy();
     expect(sliceState.current.lastHydrated).toBeNull();
     act(() => {
@@ -138,12 +129,6 @@ describe('Testing Zustand', () => {
 });
 
 describe('Testing Zustand Vanilla', () => {
-  const useStore = createVanilla<AppState>((set) => ({
-    Animal: {
-      ...slice.state,
-      actions: createStateActions<AppState, EntitySliceStateActions<AnimalModel>, EntitySliceSetActions<AppState, AnimalModel>>(set, slice.actions),
-    },
-  }));
 
   let logger = () => {};
   beforeAll(() => {
@@ -154,65 +139,95 @@ describe('Testing Zustand Vanilla', () => {
     logger(); // unsub logger
   });
   it('Test hydrateAll action', () => {
-    const { Animal } = useStore.getState();
-    Animal.actions.hydrateAll([
+    const { Alerts } = useTestVanillaStore.getState();
+    Alerts.actions.hydrateAll([
       {
-        name: 'Duck',
-        noise: 'Quack',
+        id: '1',
+        message: 'Success',
+        open: true,
+        severity: 'success',
       },
       {
-        name: 'Cow',
-        noise: 'Moo',
+        id: '2',
+        message: 'Warning',
+        open: true,
+        severity: 'warning',
+      },
+      {
+        id: '3',
+        message: 'Error',
+        open: true,
+        severity: 'error',
       },
     ]);
-    expect(useStore.getState().Animal.entities?.Duck?.noise).toBe('Quack');
-    expect(useStore.getState().Animal.entities?.Duck?.name).toBe('Duck');
-    Animal.actions.reset();
-    expect(useStore.getState().Animal.lastHydrated).toBeNull();
+    expect(useTestVanillaStore.getState().Alerts.entities?.['1'].message).toBe('Success');
+    expect(useTestVanillaStore.getState().Alerts.entities?.['1']?.open).toBe(true);
+    Alerts.actions.reset();
+    expect(useTestVanillaStore.getState().Alerts.lastHydrated).toBeNull();
   });
 
   it('Test upsertMany action', () => {
-    const { Animal } = useStore.getState();
-    Animal.actions.upsertMany([
+    const { Alerts } = useTestVanillaStore.getState();
+    Alerts.actions.upsertMany([
       {
-        name: 'Duck',
-        noise: 'Quack',
+        id: '1',
+        message: 'Success',
+        open: true,
+        severity: 'success',
       },
       {
-        name: 'Cow',
-        noise: 'Moo',
+        id: '2',
+        message: 'Warning',
+        open: true,
+        severity: 'warning',
+      },
+      {
+        id: '3',
+        message: 'Error',
+        open: true,
+        severity: 'error',
       },
     ]);
-    let state = useStore.getState();
-    expect(state.Animal.entities?.Duck?.noise).toBe('Quack');
-    expect(state.Animal.entities?.Duck?.name).toBe('Duck');
-    expect(state.Animal.lastHydrated).toBeFalsy();
-    expect(state.Animal.lastModified).toBeTruthy();
-    Animal.actions.reset();
-    state = useStore.getState();
-    expect(state.Animal.lastHydrated).toBeNull();
+    let state = useTestVanillaStore.getState();
+    expect(state.Alerts.entities?.['1'].message).toBe('Success');
+    expect(state.Alerts.entities?.['1']?.open).toBe(true);
+    expect(state.Alerts.lastHydrated).toBeFalsy();
+    expect(state.Alerts.lastModified).toBeTruthy();
+    Alerts.actions.reset();
+    state = useTestVanillaStore.getState();
+    expect(state.Alerts.lastHydrated).toBeNull();
   });
 
   it('Test setAll action', () => {
-    const { Animal } = useStore.getState();
-    Animal.actions.setAll([
+    const { Alerts } = useTestVanillaStore.getState();
+    Alerts.actions.setAll([
       {
-        name: 'Duck',
-        noise: 'Quack',
+        id: '1',
+        message: 'Success',
+        open: true,
+        severity: 'success',
       },
       {
-        name: 'Cow',
-        noise: 'Moo',
+        id: '2',
+        message: 'Warning',
+        open: true,
+        severity: 'warning',
+      },
+      {
+        id: '3',
+        message: 'Error',
+        open: true,
+        severity: 'error',
       },
     ]);
-    let state = useStore.getState();
-    expect(state.Animal.entities?.Duck?.noise).toBe('Quack');
-    expect(state.Animal.entities?.Duck?.name).toBe('Duck');
-    expect(state.Animal.lastHydrated).toBeFalsy();
-    expect(state.Animal.lastModified).toBeTruthy();
-    Animal.actions.reset();
-    state = useStore.getState();
-    expect(useStore.getState().Animal.lastHydrated).toBeNull();
+    let state = useTestVanillaStore.getState();
+    expect(state.Alerts.entities?.['1'].message).toBe('Success');
+    expect(state.Alerts.entities?.['1']?.open).toBe(true);
+    expect(state.Alerts.lastHydrated).toBeFalsy();
+    expect(state.Alerts.lastModified).toBeTruthy();
+    Alerts.actions.reset();
+    state = useTestVanillaStore.getState();
+    expect(useTestVanillaStore.getState().Alerts.lastHydrated).toBeNull();
   });
 });
 

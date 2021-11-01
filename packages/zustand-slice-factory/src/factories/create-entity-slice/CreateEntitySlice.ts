@@ -1,6 +1,8 @@
 import { createSelector } from 'reselect';
+import { SetState } from 'zustand';
 import createEntityAdapter from '../../adapters/create-entity-adapter/CreateEntityAdapter';
 import createSliceAdapter from '../../adapters/create-slice-adapter';
+import { createStateActions } from '../../models/actions-state/ActionsState';
 import EntityState, { EntityStateType } from '../../models/entity-state';
 import { Comparer, EntityId, SliceStateActions, Action, SliceSetActions, SetAction, SliceSelectors, Selector, MetaSliceSelectors, SelectIdMethod } from '../../types';
 import { getISOString } from '../../utils';
@@ -57,9 +59,19 @@ type EntitySliceOptions<
   initialState?: Partial<EntityStateType<TEntity>>;
 };
 
-export type EntitySliceState<TModel extends object, TSliceActions extends EntitySliceStateActions<TModel> = EntitySliceStateActions<TModel>> = EntityStateType<TModel> & {
+export type EntitySliceState<TEntity extends object, TSliceActions extends EntitySliceStateActions<TEntity> = EntitySliceStateActions<TEntity>> = EntityStateType<TEntity> & {
   actions: TSliceActions
 };
+
+export const createEntitySliceState = <
+  TAppState extends object,
+  TEntity extends object,
+  TSliceStateActions extends EntitySliceStateActions<TEntity> = EntitySliceStateActions<TEntity>,
+  TSliceSetActions extends EntitySliceSetActions<TAppState, TEntity> = EntitySliceSetActions<TAppState, TEntity>,
+>(set: SetState<TAppState>, state: EntityStateType<TEntity>, actions: TSliceSetActions): EntitySliceState<TEntity, TSliceStateActions> => ({
+    ...state,
+    actions: createStateActions<TAppState, TSliceStateActions, TSliceSetActions>(set, actions),
+  });
 
 export type EntitySlice<
   TAppState extends object,

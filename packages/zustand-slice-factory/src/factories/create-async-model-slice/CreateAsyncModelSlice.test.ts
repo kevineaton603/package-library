@@ -2,28 +2,11 @@
  * @jest-environment jsdom
  */
 import { act, renderHook } from '@testing-library/react-hooks';
-import create from 'zustand';
-import { AsyncModelSliceStateActions, AsyncModelSliceSetActions } from './CreateAsyncModelSlice';
-import { PremiumProfile, UserProfileModel } from '../../fixtures';
-import { createStateActions } from '../../models/actions-state/ActionsState';
-import createAsyncModelSlice, { AsyncModelSliceState } from './CreateAsyncModelSlice';
-
-type AppState = {
-  User: AsyncModelSliceState<UserProfileModel>;
-};
-
-const slice = createAsyncModelSlice<AppState, UserProfileModel, Error>({
-  name: 'User',
-  selectSliceState: (appState) => appState.User,
-});
+import { PremiumProfile } from '../../fixtures';
+import useTestStore from '../../fixtures/store/useTestStore';
+import UserProfileDuck from '../../fixtures/features/UserProfileDuck';
 
 describe('Testing Zustand', () => {
-  const useStore = create<AppState>((set) => ({
-    User: {
-      ...slice.state,
-      actions: createStateActions<AppState, AsyncModelSliceStateActions<UserProfileModel>, AsyncModelSliceSetActions<AppState, UserProfileModel>>(set, slice.actions),
-    },
-  }));
   
   const logger = () => {};
   beforeAll(() => {
@@ -35,8 +18,8 @@ describe('Testing Zustand', () => {
   });
   
   it('Test hydrate action', () => {
-    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    const { result } = renderHook(() => useTestStore(UserProfileDuck.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useTestStore(UserProfileDuck.selectors.selectSliceState));
     act(() => {
       result.current.hydrate(PremiumProfile.model);
     });
@@ -52,8 +35,8 @@ describe('Testing Zustand', () => {
   });
   
   it('Test update action', () => {
-    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    const { result } = renderHook(() => useTestStore(UserProfileDuck.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useTestStore(UserProfileDuck.selectors.selectSliceState));
     act(() => {
       result.current.update(PremiumProfile.model);
     });
@@ -69,8 +52,8 @@ describe('Testing Zustand', () => {
   });
   
   it('Test set action', () => {
-    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    const { result } = renderHook(() => useTestStore(UserProfileDuck.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useTestStore(UserProfileDuck.selectors.selectSliceState));
     act(() => {
       result.current.set(PremiumProfile.model);
     });

@@ -1,18 +1,7 @@
 import { AsyncModelSliceState } from '../factories/create-async-model-slice';
 import { EntitySliceState } from '../factories/create-entity-slice/CreateEntitySlice';
 import { ModelSliceState } from '../factories/create-model-slice/CreateModelSlice';
-
-export enum UserRoleEnum {
-  Basic,
-  Premium,
-  Admin,
-}
-
-export type UserProfileModel = {
-  username: string;
-  url: string;
-  roles: UserRoleEnum[];
-};
+import { UserProfileModel, UserRoleEnum } from './models/UserProfile';
 
 export type UserProfileEntityState = EntitySliceState<UserProfileModel>;
 

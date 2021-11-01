@@ -1,14 +1,16 @@
 /**
  * @jest-environment jsdom
  */
-import create from 'zustand';
 import createVanilla, { SetState } from 'zustand/vanilla';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { act, renderHook } from '@testing-library/react-hooks';
 import createModelSlice, { ModelSliceSetActions, ModelSliceStateActions } from './CreateModelSlice';
 import { Action, SetAction } from '../../types';
 import { createStateActions } from '../../models/actions-state/ActionsState';
-import { PremiumProfile, TestAppState, UserProfileModel } from '../../fixtures';
+import { PremiumProfile, TestAppState } from '../../fixtures';
+import useTestStore from '../../fixtures/store/useTestStore';
+import MenuDuck from '../../fixtures/features/MenuDuck';
+import { UserProfileModel } from '../../fixtures/models/UserProfile';
 
 type AppState = Omit<TestAppState, 'Followers'>;
 
@@ -37,13 +39,6 @@ const allActions = {
 };
 
 describe('Testing Zustand', () => {
-  const useStore = create<AppState>((set) => ({
-    User: {
-      ...slice.state,
-      actions: createStateActions<AppState, UserStateActions, UserActions>(set, allActions),
-    },
-  }));
-
   const logger = () => {};
   beforeAll(() => {
     // logger = useStore.subscribe(console.log, slice.selectors.selectSliceState);
@@ -54,53 +49,53 @@ describe('Testing Zustand', () => {
   });
 
   it('Test hydrate action', () => {
-    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    const { result } = renderHook(() => useTestStore(MenuDuck.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useTestStore(MenuDuck.selectors.selectSliceState));
     act(() => {
-      result.current.hydrate(PremiumProfile.model);
+      result.current.hydrate({ open: true });
     });
     
-    expect(sliceState.current.model?.username).toBe(PremiumProfile.model.username);
-    expect(sliceState.current.model?.url).toBe(PremiumProfile.model.url);
+    expect(sliceState.current.model?.open).toBe(true);
     expect(sliceState.current.lastHydrated).toBeTruthy();
     expect(sliceState.current.lastModified).toBeNull();
     act(() => {
       result.current.reset();
     });
+    expect(sliceState.current.model?.open).toBe(false);
     expect(sliceState.current.lastHydrated).toBeNull();
   });
 
   it('Test update action', () => {
-    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    const { result } = renderHook(() => useTestStore(MenuDuck.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useTestStore(MenuDuck.selectors.selectSliceState));
     act(() => {
-      result.current.update(PremiumProfile.model);
+      result.current.update({ open: true });
     });
     
-    expect(sliceState.current.model?.username).toBe(PremiumProfile.model.username);
-    expect(sliceState.current.model?.url).toBe(PremiumProfile.model.url);
+    expect(sliceState.current.model?.open).toBe(true);
     expect(sliceState.current.lastHydrated).toBeNull();
     expect(sliceState.current.lastModified).toBeTruthy();
     act(() => {
       result.current.reset();
     });
+    expect(sliceState.current.model?.open).toBe(false);
     expect(sliceState.current.lastHydrated).toBeNull();
   });
 
   it('Test set action', () => {
-    const { result } = renderHook(() => useStore(slice.selectors.selectActions));
-    const { result: sliceState } = renderHook(() => useStore(slice.selectors.selectSliceState));
+    const { result } = renderHook(() => useTestStore(MenuDuck.selectors.selectActions));
+    const { result: sliceState } = renderHook(() => useTestStore(MenuDuck.selectors.selectSliceState));
     act(() => {
-      result.current.set(PremiumProfile.model);
+      result.current.set({ open: true });
     });
     
-    expect(sliceState.current.model?.username).toBe(PremiumProfile.model.username);
-    expect(sliceState.current.model?.url).toBe(PremiumProfile.model.url);
+    expect(sliceState.current.model?.open).toBe(true);
     expect(sliceState.current.lastHydrated).toBeNull();
     expect(sliceState.current.lastModified).toBeTruthy();
     act(() => {
       result.current.reset();
     });
+    expect(sliceState.current.model?.open).toBe(false);
     expect(sliceState.current.lastHydrated).toBeNull();
   });
 });

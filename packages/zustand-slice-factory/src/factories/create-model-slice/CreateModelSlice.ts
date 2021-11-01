@@ -3,6 +3,8 @@ import ModelState, { ModelStateType } from '../../models/model-state';
 import { Action, MetaSliceSelectors, SetAction, SliceSetActions, SliceSelectors, SliceStateActions } from '../../types';
 import createSliceAdapter from '../../adapters/create-slice-adapter';
 import { getISOString } from '../../utils';
+import { SetState } from 'zustand';
+import { createStateActions } from '../../models/actions-state/ActionsState';
 
 export type ModelSliceSelectors<
   TAppState extends object,
@@ -38,6 +40,16 @@ export type ModelSlice<
   selectors: ModelSliceSelectors<TAppState, TModel, TSliceActions>;
   state: ModelStateType<TModel>;
 };
+
+export const createModelSliceState = <
+  TAppState extends object,
+  TModel extends object,
+  TSliceStateActions extends ModelSliceStateActions<TModel> = ModelSliceStateActions<TModel>,
+  TSliceSetActions extends ModelSliceSetActions<TAppState, TModel> = ModelSliceSetActions<TAppState, TModel>,
+>(set: SetState<TAppState>, state: ModelStateType<TModel>, actions: TSliceSetActions): ModelSliceState<TModel, TSliceStateActions> => ({
+    ...state,
+    actions: createStateActions<TAppState, TSliceStateActions, TSliceSetActions>(set, actions),
+  });
 
 const createModelSlice = <
   TAppState extends object,

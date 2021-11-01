@@ -1,102 +1,96 @@
-## Commands
+# zustand-slice-factory 🐻🍕🏭
 
-TSDX scaffolds your new library inside `/src`, and also sets up a [Parcel-based](https://parceljs.org) playground for it inside `/example`.
+> A light-weight package with generic factory functions for common slice data structures
 
-The recommended workflow is to run TSDX in one terminal:
+> Inspired by [redux-slice-factory 🍕🏭](https://github.com/gregjoeval/package-library/tree/master/packages/redux-slice-factory)
 
-```bash
-npm start # or yarn start
+## Install 💾
+```shell
+npm install zustand-slice-factory
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
+## What's the goal? 🏆
+This package will
+- reduce boilerplate
+- prevent duplicate code
+- save you time & effort
 
-Then run the example inside another:
+## What's a Slice?
 
-```bash
-cd example
-npm i # or yarn to install dependencies
-npm start # or yarn start
-```
+A slice is a bundle of everything associated to a piece of zustand state `{ name, selectors, actions, state }`
 
-The default example imports and live reloads whatever is in `/dist`, so if you are seeing an out of date component, make sure TSDX is running in watch mode like we recommend above. **No symlinking required**, we use [Parcel's aliasing](https://parceljs.org/module_resolution.html#aliases).
+the `name` is the domain the slice is responsible for
+the `selectors` exposes functions to read data for state
 
-To do a one-off build, use `npm run build` or `yarn build`.
+## Why use Slices?
+[Read this if you want to learn more](https://github.com/pmndrs/zustand/wiki/Splitting-the-store-into-separate-slices)
 
-To run tests, use `npm test` or `yarn test`.
+## What's Included?
+- `createModelSlice()` create a slice for a single synchronous model 
+- `createEntitySlice()` create a slice for a collection of synchronous entities
+- `createAsyncModelSlice()` create a slice for a single asynchronous model 
+- `createAsyncEntitySlice()` create a slice for a collection of asynchronous entities
+## Why differentiate between async/sync slices?
 
-## Configuration
+- Not every slice needs to track request information (i.e. UI data like Menus, Alert etc.)
+- Reduce amount of unused information in the store
+- SyncSlice can be easily extends into AsyncSlice if need be.
 
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
+## Show Me the Code...
 
-### Jest
+### Zustand (with Hooks)
 
-Jest tests are set up to run with `npm test` or `yarn test`.
+```tsx
+type AppState = {
+  User: AsyncModelSliceState<UserProfileModel>;
+};
 
-### Bundle analysis
+const slice = createAsyncModelSlice<AppState, UserProfileModel, Error>({
+  name: 'User',
+  selectSliceState: (appState) => appState.User,
+});
 
-Calculates the real cost of your library using [size-limit](https://github.com/ai/size-limit) with `npm run size` and visulize it with `npm run analyze`.
-
-
-## Continuous Integration
-
-### GitHub Actions
-
-Two actions are added by default:
-
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [`size-limit`](https://github.com/ai/size-limit)
-
-## Optimizations
-
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
-
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
-
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
-}
-```
-
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
-
-## Module Formats
-
-CJS, ESModules, and UMD module formats are supported.
-
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
-
-## Named Exports
-
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
-
-## Including Styles
-
-There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
-
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
-
-## Publishing to NPM
-
-We recommend using [np](https://github.com/sindresorhus/np).
-
-## Usage with Lerna
-
-When creating a new package with TSDX within a project set up with Lerna, you might encounter a `Cannot resolve dependency` error when trying to run the `example` project. To fix that you will need to make changes to the `package.json` file _inside the `example` directory_.
-
-The problem is that due to the nature of how dependencies are installed in Lerna projects, the aliases in the example project's `package.json` might not point to the right place, as those dependencies might have been installed in the root of your Lerna project.
-
-Change the `alias` to point to where those packages are actually installed. This depends on the directory structure of your Lerna project, so the actual path might be different from the diff below.
-
-```diff
-   "alias": {
--    "react": "../node_modules/react",
--    "react-dom": "../node_modules/react-dom"
-+    "react": "../../../node_modules/react",
-+    "react-dom": "../../../node_modules/react-dom"
+const useStore = create<AppState>((set) => ({
+   User: {
+   ...slice.state,
+   // Helper Methods to Inject SetState into actions stored in state. 
+   actions: createStateActions<AppState, AsyncModelSliceStateActions<UserProfileModel>, AsyncModelSliceSetActions<AppState, UserProfileModel>>(set, slice.actions),
    },
+}));
+
+const UserProfile: React.FC = () => {
+   const userActions = useStore(slice.selectors.selectActions);
+   const userModelState = useStore(slice.selectors.selectStateSlice);
+
+   useEffect(() => {
+      userActions.set({
+         username: 'kevin.saco.eaton@gmail.edu',
+         url: 'https://github.com/kevineaton603',
+         roles: [UserRoleEnum.Premium],
+      })
+   }, [])
+   return(<div>{userModelState.model.username}</div>)
+}
+
 ```
 
-An alternative to fixing this problem would be to remove aliases altogether and define the dependencies referenced as aliases as dev dependencies instead. [However, that might cause other problems.](https://github.com/palmerhq/tsdx/issues/64)
+### Zustand Vanilla (without Hooks)
+
+```ts
+type AppState = {
+  User: AsyncModelSliceState<UserProfileModel>;
+};
+
+const slice = createAsyncModelSlice<AppState, UserProfileModel, Error>({
+  name: 'User',
+  selectSliceState: (appState) => appState.User,
+});
+
+const useStore = create<AppState>((set) => ({
+   User: {
+   ...slice.state,
+   // Helper Methods to Inject SetState into actions stored in state. 
+   actions: createStateActions<AppState, AsyncModelSliceStateActions<UserProfileModel>, AsyncModelSliceSetActions<AppState, UserProfileModel>>(set, slice.actions),
+   },
+}));
+```
