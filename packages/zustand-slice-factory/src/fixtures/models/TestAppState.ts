@@ -6,17 +6,8 @@ import { ModelSliceState } from '../../factories/create-model-slice';
 import { AlertsSliceActions } from '../features/AlertDuck';
 import { FollowersSliceActions } from '../features/FollowersDuck';
 import { UserProfileSliceActions } from '../features/UserProfileDuck';
-
-export type MenuModel = {
-  open: boolean;
-};
-
-export type AlertModel = {
-  id: string;
-  open: boolean;
-  message: string;
-  severity: string;
-};
+import { AlertModel } from './AlertModel';
+import { MenuModel } from './MenuModel';
 
 type TestAppState = {
   Menu: ModelSliceState<MenuModel>;

@@ -2,7 +2,8 @@ import { SetState } from 'zustand';
 import { Action, SetAction } from '../..';
 import createEntitySlice from '../../factories/create-entity-slice';
 import { createEntitySliceState, EntitySliceState, EntitySliceStateActions } from '../../factories/create-entity-slice/CreateEntitySlice';
-import TestAppState, { AlertModel } from '../models/TestAppState';
+import TestAppState from '../models/TestAppState';
+import { AlertModel } from '../models/AlertModel';
 
 export type AlertsSliceActions = EntitySliceStateActions<AlertModel> & {
   closeAll: Action

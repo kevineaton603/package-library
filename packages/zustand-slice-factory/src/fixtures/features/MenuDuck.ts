@@ -1,4 +1,5 @@
-import TestAppState, { MenuModel } from '../models/TestAppState';
+import TestAppState from '../models/TestAppState';
+import { MenuModel } from '../models/MenuModel';
 import createModelSlice from '../../factories/create-model-slice';
 import { createModelSliceState } from '../../factories/create-model-slice/CreateModelSlice';
 import { SetState } from 'zustand';
