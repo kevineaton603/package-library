@@ -10,9 +10,6 @@ import { getISOString } from '../../utils';
 export type EntitySliceSetActions<TAppState extends object, TEntity extends object> = SliceSetActions<TAppState> & {
   addOne: SetAction<TAppState, [TEntity]>;
   addMany: SetAction<TAppState, [TEntity[]]>;
-  hydrateOne: SetAction<TAppState, [TEntity]>
-  hydrateMany: SetAction<TAppState, [TEntity[]]>;
-  hydrateAll: SetAction<TAppState, [TEntity[]]>;
   upsertOne: SetAction<TAppState, [TEntity]>;
   upsertMany: SetAction<TAppState, [TEntity[]]>;
   removeOne: SetAction<TAppState, [EntityId]>;
@@ -24,9 +21,6 @@ export type EntitySliceSetActions<TAppState extends object, TEntity extends obje
 export type EntitySliceStateActions<TEntity extends object> = SliceStateActions & {
   addOne: Action<[TEntity]>;
   addMany: Action<[TEntity[]]>;
-  hydrateOne: Action<[TEntity]>
-  hydrateMany: Action<[TEntity[]]>;
-  hydrateAll: Action<[TEntity[]]>;
   upsertOne: Action<[TEntity]>;
   upsertMany: Action<[TEntity[]]>;
   removeOne: Action<[EntityId]>;
@@ -98,7 +92,6 @@ const createEntitySlice = <
     selectTotal: createSelector(options.selectSliceState, (model) => model.ids.length),
     selectAll: createSelector(options.selectSliceState, (model) => Object.values(model.entities)),
     selectLastModified: createSelector(options.selectSliceState, (model) => model.lastModified),
-    selectLastHydrated: createSelector(options.selectSliceState, (model) => model.lastHydrated),
     selectById: (id: EntityId) => createSelector(options.selectSliceState, (model) => model.entities?.[id]),
   };
 
@@ -114,10 +107,6 @@ const createEntitySlice = <
     return sliceAdapter.setLastModified(state, lastModified);
   };
 
-  const hydrateState = (state: EntitySliceState<TEntity>, lastHydrated: string | null): EntitySliceState<TEntity> => {
-    return sliceAdapter.setLastHydrated(sliceAdapter.setLastModified(state, null), lastHydrated);
-  };
-
   const actions: EntitySliceSetActions<TAppState, TEntity> = {
     addMany: (set) => (models) => set(state => ({
       ...state,
@@ -126,18 +115,6 @@ const createEntitySlice = <
     addOne: (set) => (model) => set(state => ({
       ...state,
       [options.name]: modifyState(entityAdapter.addOne(state[options.name] as unknown as EntitySliceState<TEntity>, model), getISOString()), 
-    })),
-    hydrateAll:  (set) => (models) => set(state => ({
-      ...state,
-      [options.name]: hydrateState(entityAdapter.setAll(state[options.name] as unknown as EntitySliceState<TEntity>, models), getISOString()), 
-    })),
-    hydrateMany: (set) => (models) => set(state => ({
-      ...state,
-      [options.name]: hydrateState(entityAdapter.upsertMany(state[options.name] as unknown as EntitySliceState<TEntity>, models), getISOString()), 
-    })),
-    hydrateOne: (set) => (model) => set(state => ({
-      ...state,
-      [options.name]: hydrateState(entityAdapter.upsertOne(state[options.name] as unknown as EntitySliceState<TEntity>, model), getISOString()), 
     })),
     removeAll: (set) => () => set(state => ({
       ...state,

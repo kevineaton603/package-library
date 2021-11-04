@@ -1,11 +1,11 @@
 /**
  * @jest-environment jsdom
  */
-import { AdminProfile, BasicProfile, PremiumProfile } from '../fixtures';
 import { act, renderHook } from '@testing-library/react-hooks';
 import useTestStore from '../fixtures/store/useTestStore';
 import UserProfileDuck from '../fixtures/features/UserProfileDuck';
 import FollowersDuck from '../fixtures/features/FollowersDuck';
+import { AdminProfile, BasicProfile, PremiumProfile } from '../fixtures/models/UserProfile';
 
 describe('Testing Zustand', () => {
   it('Hydrate Slices', () => {
@@ -14,14 +14,14 @@ describe('Testing Zustand', () => {
     const { result: followerActions } = renderHook(() => useTestStore(FollowersDuck.selectors.selectActions));
     const { result: FollowersDuckState } = renderHook(() => useTestStore(FollowersDuck.selectors.selectSliceState));
     act(() => {
-      userActions.current.hydrate(PremiumProfile.model);
+      userActions.current.hydrate(PremiumProfile);
     });
     expect(UserProfileDuckState.current.lastHydrated).toBeTruthy();
     expect(UserProfileDuckState.current.lastModified).toBeNull();
     expect(FollowersDuckState.current.lastModified).toBeNull();
     expect(FollowersDuckState.current.lastModified).toBeNull();
     act(() => {
-      followerActions.current.hydrateAll([BasicProfile.model, AdminProfile.model]);
+      followerActions.current.hydrateAll([BasicProfile, AdminProfile]);
     });
     expect(UserProfileDuckState.current.lastHydrated).toBeTruthy();
     expect(UserProfileDuckState.current.lastModified).toBeNull();
@@ -39,14 +39,14 @@ describe('Testing Zustand', () => {
     const { result: followerActions } = renderHook(() => useTestStore(FollowersDuck.selectors.selectActions));
     const { result: FollowersDuckState } = renderHook(() => useTestStore(FollowersDuck.selectors.selectSliceState));
     act(() => {
-      userActions.current.update(PremiumProfile.model);
+      userActions.current.update(PremiumProfile);
     });
     expect(UserProfileDuckState.current.lastHydrated).toBeNull();
     expect(UserProfileDuckState.current.lastModified).toBeTruthy();
     expect(FollowersDuckState.current.lastModified).toBeNull();
     expect(FollowersDuckState.current.lastModified).toBeNull();
     act(() => {
-      followerActions.current.upsertMany([BasicProfile.model, AdminProfile.model]);
+      followerActions.current.upsertMany([BasicProfile, AdminProfile]);
     });
     expect(UserProfileDuckState.current.lastHydrated).toBeNull();
     expect(UserProfileDuckState.current.lastModified).toBeTruthy();
@@ -64,14 +64,14 @@ describe('Testing Zustand', () => {
     const { result: followerActions } = renderHook(() => useTestStore(FollowersDuck.selectors.selectActions));
     const { result: FollowersDuckState } = renderHook(() => useTestStore(FollowersDuck.selectors.selectSliceState));
     act(() => {
-      userActions.current.set(PremiumProfile.model);
+      userActions.current.set(PremiumProfile);
     });
     expect(UserProfileDuckState.current.lastHydrated).toBeNull();
     expect(UserProfileDuckState.current.lastModified).toBeTruthy();
     expect(FollowersDuckState.current.lastModified).toBeNull();
     expect(FollowersDuckState.current.lastModified).toBeNull();
     act(() => {
-      followerActions.current.setAll([BasicProfile.model, AdminProfile.model]);
+      followerActions.current.setAll([BasicProfile, AdminProfile]);
     });
     expect(UserProfileDuckState.current.lastHydrated).toBeNull();
     expect(UserProfileDuckState.current.lastModified).toBeTruthy();

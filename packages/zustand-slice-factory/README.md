@@ -11,16 +11,18 @@ npm install zustand-slice-factory
 
 ## What's the goal? 🏆
 This package will
-- reduce boilerplate
-- prevent duplicate code
+- provide a more opinionated zustand experience
+- provide build-in support for async workflow
 - save you time & effort
 
-## What's a Slice?
+## What's a Slice? 🍕
 
-A slice is a bundle of everything associated to a piece of zustand state `{ name, selectors, actions, state }`
+A slice is a bundle of everything associated to a piece of zustand state `{ name, selectors, state, actions }`
 
 the `name` is the domain the slice is responsible for
 the `selectors` exposes functions to read data for state
+the `state` is the initial state used in the `create` method from zustand
+the `action` actions to be store along with state
 
 ## Why use Slices?
 [Read this if you want to learn more](https://github.com/pmndrs/zustand/wiki/Splitting-the-store-into-separate-slices)
@@ -28,8 +30,8 @@ the `selectors` exposes functions to read data for state
 ## What's Included?
 - `createModelSlice()` create a slice for a single synchronous model 
 - `createEntitySlice()` create a slice for a collection of synchronous entities
-- `createAsyncModelSlice()` create a slice for a single asynchronous model 
-- `createAsyncEntitySlice()` create a slice for a collection of asynchronous entities
+- `createAsyncModelSlice()` create a slice for a single asynchronous model with request information
+- `createAsyncEntitySlice()` create a slice for a collection of asynchronous entities with request information
 ## Why differentiate between async/sync slices?
 
 - Not every slice needs to track request information (i.e. UI data like Menus, Alert etc.)
@@ -41,21 +43,52 @@ the `selectors` exposes functions to read data for state
 ### Zustand (with Hooks)
 
 ```tsx
-type AppState = {
-  User: AsyncModelSliceState<UserProfileModel>;
+
+type UserProfileSliceActions = AsyncModelSliceStateActions<UserProfileModel> & {
+  get: Action<[string], Promise<void>>;
 };
 
-const slice = createAsyncModelSlice<AppState, UserProfileModel, Error>({
-  name: 'User',
-  selectSliceState: (appState) => appState.User,
+type UserProfileModelState = AsyncModelSliceState<UserProfileModel, Error, UserProfileSliceActions>;
+
+const slice = createAsyncModelSlice<AppState, UserProfileModel, Error, UserProfileSliceActions>({
+  name: 'UserProfile',
+  selectSliceState: (appState) => appState.UserProfile,
 });
 
+// Create your own actions
+const get: SetAction<AppState, [string], Promise<void>> = (set) => async (id) => {
+  slice.actions.setStatus(set)(StatusEnum.Requesting);
+  slice.actions.setError(set)(null);
+  try {
+    const response = await getUser(id); 
+    slice.actions.hydrate(set)(response);
+    slice.actions.setStatus(set)(StatusEnum.Settled);
+  } catch (error) {
+    slice.actions.setStatus(set)(StatusEnum.Failed);
+    slice.actions.setError(set)(error as Error);
+  }
+};
+
+const allActions = {
+  ...slice.actions,
+  get,
+};
+
+// Create final slice state that will be saved to the store
+const createUserProfileSlice = (set: SetState<AppState>) => createAsyncModelSliceState<AppState, UserProfileModel, Error, UserProfileSliceActions>(set, slice.state, allActions);
+
+const UserProfileDuck = {
+  create: createUserProfileSlice,
+  name: slice.name,
+  selectors: slice.selectors,
+};
+
+type AppState = {
+  UserProfile: AsyncModelSliceState<UserProfileModel, Error, UserProfileSliceActions>
+};
+
 const useStore = create<AppState>((set) => ({
-   User: {
-   ...slice.state,
-   // Helper Methods to Inject SetState into actions stored in state. 
-   actions: createStateActions<AppState, AsyncModelSliceStateActions<UserProfileModel>, AsyncModelSliceSetActions<AppState, UserProfileModel>>(set, slice.actions),
-   },
+  UserProfile: UserProfileDuck.create(set),
 }));
 
 const UserProfile: React.FC = () => {
@@ -77,20 +110,16 @@ const UserProfile: React.FC = () => {
 ### Zustand Vanilla (without Hooks)
 
 ```ts
-type AppState = {
-  User: AsyncModelSliceState<UserProfileModel>;
-};
-
-const slice = createAsyncModelSlice<AppState, UserProfileModel, Error>({
-  name: 'User',
-  selectSliceState: (appState) => appState.User,
-});
+...
 
 const useStore = create<AppState>((set) => ({
-   User: {
-   ...slice.state,
-   // Helper Methods to Inject SetState into actions stored in state. 
-   actions: createStateActions<AppState, AsyncModelSliceStateActions<UserProfileModel>, AsyncModelSliceSetActions<AppState, UserProfileModel>>(set, slice.actions),
-   },
+  UserProfile: UserProfileDuck.create(set),
 }));
+
+const { UserProfile } = store.getState();
+UserProfile.actions.set({
+   username: 'kevin.saco.eaton@gmail.edu',
+   url: 'https://github.com/kevineaton603',
+   roles: [UserRoleEnum.Premium],
+});
 ```

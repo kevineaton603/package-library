@@ -14,48 +14,42 @@ export type TestAppState = {
   Followers: UserProfileEntityState;
 };
 
-export const PremiumProfile = Object.freeze<UserProfileModelState>({
+export const PremiumProfileModelState = Object.freeze<UserProfileModelState>({
   model: {
     username: 'keaton@champlain.edu',
     url: 'https://github.com/kevineaton603',
     roles: [UserRoleEnum.Premium],
   },
-  lastHydrated: null,
   lastModified: null,
   actions: {
-    hydrate: () => {},
     reset: () => {},
     set: () => {},
     update: () => {},
   },
 });
 
-export const BasicProfile = Object.freeze<UserProfileModelState>({
+export const BasicProfileModelState = Object.freeze<UserProfileModelState>({
   model: {
     username: 'gov.eaton@gmail.com',
     url: 'https://github.com/kevineaton603',
     roles: [UserRoleEnum.Basic],
   },
-  lastHydrated: null,
   lastModified: null,
   actions: {
-    hydrate: () => {},
     reset: () => {},
     set: () => {},
     update: () => {},
   },
 });
 
-export const AdminProfile = Object.freeze<UserProfileModelState>({
+export const AdminProfileModelState = Object.freeze<UserProfileModelState>({
   model: {
     username: 'kevin.saco.eaton@gmail.com',
     url: 'https://github.com/kevineaton603',
     roles: [UserRoleEnum.Admin],
   },
-  lastHydrated: null,
   lastModified: null,
   actions: {
-    hydrate: () => {},
     reset: () => {},
     set: () => {},
     update: () => {},

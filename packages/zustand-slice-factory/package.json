@@ -11,6 +11,10 @@
     "type": "git",
     "url": "git+https://github.com/kevineaton603/package-library.git"
   },
+  "homepage": "https://github.com/kevineaton603/package-library/tree/master/packages/zustand-slice-factory",
+  "bugs": {
+    "url": "https://github.com/kevineaton603/package-library/issues"
+  },
   "engines": {
     "node": ">=10"
   },
@@ -93,5 +97,12 @@
       "^.+\\.tsx?$": "esbuild-jest"
     },
     "verbose": true
-  }
+  },
+  "keywords": [
+    "zustand",
+    "store",
+    "slice",
+    "state",
+    "redux"
+  ]
 }

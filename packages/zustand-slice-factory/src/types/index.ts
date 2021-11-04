@@ -21,10 +21,10 @@ export type SliceSelectors<TAppState extends object, TSliceState, TActionsState 
 
 export type MetaSliceSelectors<TAppState extends object> = {
   selectLastModified: Selector<TAppState, string | null>;
-  selectLastHydrated: Selector<TAppState, string | null>;
 };
 
 export type AsyncMetaSliceSelectors<TAppState extends object, TError extends Error = Error> = MetaSliceSelectors<TAppState> & {
+  selectLastHydrated: Selector<TAppState, string | null>;
   selectError: Selector<TAppState, TError | null>;
   selectStatus: Selector<TAppState, StatusEnum>;
 };
