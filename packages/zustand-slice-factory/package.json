@@ -32,7 +32,8 @@
     "setup:clean-install": "npm ci"
   },
   "peerDependencies": {
-    "react": ">=16"
+    "react": ">=16",
+    "zustand": "~3"
   },
   "husky": {
     "hooks": {
@@ -89,8 +90,7 @@
   },
   "dependencies": {
     "lodash.clonedeep": "^4.5.0",
-    "reselect": "^4.0.0",
-    "zustand": "^3.5.12"
+    "reselect": "^4.0.0"
   },
   "jest": {
     "transform": {
@@ -103,7 +103,8 @@
     "store",
     "slice",
     "state",
-    "redux"
+    "redux",
+    "state management"
   ],
-  "description": "> A light-weight package with generic factory functions for common slice data structures"
+  "description": "A light-weight package with generic factory functions for common slice data structures"
 }
