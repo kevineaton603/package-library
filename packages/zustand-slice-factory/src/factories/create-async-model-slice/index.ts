@@ -1,4 +1,4 @@
-export { default } from './CreateAsyncModelSlice';
+export { default, createAsyncModelSliceState } from './CreateAsyncModelSlice';
 export type {
   AsyncModelSlice,
   AsyncModelSliceSelectors,

@@ -1,8 +1,8 @@
-export { default } from './CreateAsyncEntitySlice';
+export { default, createAsyncEntitySliceState } from './CreateAsyncEntitySlice';
 export type {
   AsyncEntitySliceSelectors,
   AsyncEntitySliceSetActions,
   AsyncEntitySliceState,
   AsyncEntitySliceStateActions,
-  AsyncEntitySlice as AsyncModelSlice,
+  AsyncEntitySlice,
 } from './CreateAsyncEntitySlice';
