@@ -1,4 +1,4 @@
-export { default } from './CreateModelSlice';
+export { default, createModelSliceState } from './CreateModelSlice';
 export type {
   ModelSlice,
   ModelSliceSelectors,

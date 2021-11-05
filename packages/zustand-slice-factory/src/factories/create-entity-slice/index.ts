@@ -1,4 +1,4 @@
-export { default } from './CreateEntitySlice';
+export { default, createEntitySliceState } from './CreateEntitySlice';
 export type {
   EntitySlice,
   EntitySliceSelectors,
