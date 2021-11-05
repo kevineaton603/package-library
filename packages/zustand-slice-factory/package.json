@@ -5,7 +5,7 @@
   "typings": "dist/index.d.ts",
   "files": [
     "dist",
-    "src"
+    "/src/!(fixtures)/**/!(*.test).ts"
   ],
   "repository": {
     "type": "git",
@@ -104,5 +104,6 @@
     "slice",
     "state",
     "redux"
-  ]
+  ],
+  "description": "> A light-weight package with generic factory functions for common slice data structures"
 }
