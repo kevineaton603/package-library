@@ -131,7 +131,7 @@ const createEntitySlice = <
     reset: (set) => () => set(state => ({
       ...state,
       [options.name]: {
-        ...state[options.name],
+        actions: (state[options.name] as unknown as EntitySliceState<TEntity, TSliceActions>).actions,
         ...initialState,
       }, 
     })),

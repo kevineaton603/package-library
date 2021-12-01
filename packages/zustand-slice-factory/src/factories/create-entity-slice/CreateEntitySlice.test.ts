@@ -9,7 +9,7 @@ describe('Testing Zustand', () => {
 
   let logger = () => {};
   beforeAll(() => {
-    // logger = useStore.subscribe(console.log, slice.selectors.selectSliceState);
+    logger = useTestStore.subscribe(console.log, AlertsDuck.selectors.selectSliceState);
   });
 
   afterAll(() => {
@@ -84,6 +84,7 @@ describe('Testing Zustand', () => {
       result.current.reset();
     });
     expect(sliceState.current.lastModified).toBeNull();
+    expect(sliceState.current.entities).toMatchObject({});
   });
 });
 

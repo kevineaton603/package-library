@@ -78,7 +78,7 @@ const createModelSlice = <
     reset: (set) => () => set(state => ({
       ...state,
       [options.name]: {
-        ...state[options.name],
+        actions: (state[options.name] as unknown as ModelSliceState<TModel, TSliceActions>).actions,
         ...initialState, 
       }, 
     })),
