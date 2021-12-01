@@ -86,7 +86,7 @@ const createAsyncModelSlice = <TAppState extends object, TModel extends object, 
     reset: (set) => () => set(state => ({
       ...state,
       [options.name]: {
-        ...state[options.name] as unknown as AsyncModelSliceState<TModel>,
+        actions: (state[options.name] as unknown as AsyncModelSliceState<TModel, TError, TSliceStateActions>).actions,
         ...initialState, 
       }, 
     })),

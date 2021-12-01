@@ -4,6 +4,8 @@
 
 > Inspired by [redux-slice-factory 🍕🏭](https://github.com/gregjoeval/package-library/tree/master/packages/redux-slice-factory)
 
+![version](https://badgen.net/npm/v/zustand-slice-factory) ![types](https://badgen.net/npm/types/zustand-slice-factory) ![types](https://badgen.net/packagephobia/install/zustand-slice-factory) ![types](https://badgen.net/packagephobia/publish/zustand-slice-factory) ![types](https://badgen.net/badge/license/MIT/blue)
+
 ## Install 💾
 ```shell
 npm install zustand-slice-factory
@@ -75,7 +77,11 @@ const allActions = {
 };
 
 // Create final slice state that will be saved to the store
-const createUserProfileSlice = (set: SetState<AppState>) => createAsyncModelSliceState<AppState, UserProfileModel, Error, UserProfileSliceActions>(set, slice.state, allActions);
+const createUserProfileSlice = (set: SetState<AppState>) => createAsyncModelSliceState<AppState, UserProfileModel, Error, UserProfileSliceActions>(
+  set,
+  slice.state,
+  allActions
+);
 
 const UserProfileDuck = {
   create: createUserProfileSlice,

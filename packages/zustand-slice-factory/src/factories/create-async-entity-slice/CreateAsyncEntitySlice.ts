@@ -82,11 +82,11 @@ export type AsyncEntitySlice<
 
 export const createAsyncEntitySliceState = <
   TAppState extends object,
-  TModel extends object,
+  TEntity extends object,
   TError extends Error = Error,
-  TSliceStateActions extends AsyncEntitySliceStateActions<TModel, TError> = AsyncEntitySliceStateActions<TModel, TError>,
-  TSliceSetActions extends AsyncEntitySliceSetActions<TAppState, TModel, TError> = AsyncEntitySliceSetActions<TAppState, TModel, TError>,
->(set: SetState<TAppState>, state: AsyncEntityStateType<TModel, TError>, actions: TSliceSetActions): AsyncEntitySliceState<TModel, TError, TSliceStateActions> => ({
+  TSliceStateActions extends AsyncEntitySliceStateActions<TEntity, TError> = AsyncEntitySliceStateActions<TEntity, TError>,
+  TSliceSetActions extends AsyncEntitySliceSetActions<TAppState, TEntity, TError> = AsyncEntitySliceSetActions<TAppState, TEntity, TError>,
+>(set: SetState<TAppState>, state: AsyncEntityStateType<TEntity, TError>, actions: TSliceSetActions): AsyncEntitySliceState<TEntity, TError, TSliceStateActions> => ({
     ...state,
     actions: createStateActions<TAppState, TSliceStateActions, TSliceSetActions>(set, actions),
   });
@@ -164,7 +164,7 @@ const createAsyncEntitySlice = <
     reset: (set) => () => set(state => ({
       ...state,
       [options.name]: {
-        ...state[options.name],
+        actions: (state[options.name] as unknown as AsyncEntitySliceState<TEntity, TError, TSliceActions>).actions,
         ...initialState,
       }, 
     })),

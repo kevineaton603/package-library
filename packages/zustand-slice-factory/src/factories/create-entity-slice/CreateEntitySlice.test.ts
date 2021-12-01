@@ -7,13 +7,13 @@ import useTestStore, { useTestVanillaStore } from '../../fixtures/store/useTestS
 
 describe('Testing Zustand', () => {
 
-  let logger = () => {};
+  // let logger = () => {};
   beforeAll(() => {
-    // logger = useStore.subscribe(console.log, slice.selectors.selectSliceState);
+    // logger = useTestStore.subscribe(console.log, AlertsDuck.selectors.selectSliceState);
   });
 
   afterAll(() => {
-    logger(); // unsub logger
+    // logger(); // unsub logger
   });
 
   it('Test updateMany action', () => {
@@ -84,6 +84,7 @@ describe('Testing Zustand', () => {
       result.current.reset();
     });
     expect(sliceState.current.lastModified).toBeNull();
+    expect(sliceState.current.entities).toMatchObject({});
   });
 });
 
