@@ -7,13 +7,13 @@ import useTestStore, { useTestVanillaStore } from '../../fixtures/store/useTestS
 
 describe('Testing Zustand', () => {
 
-  let logger = () => {};
+  // let logger = () => {};
   beforeAll(() => {
-    logger = useTestStore.subscribe(console.log, AlertsDuck.selectors.selectSliceState);
+    // logger = useTestStore.subscribe(console.log, AlertsDuck.selectors.selectSliceState);
   });
 
   afterAll(() => {
-    logger(); // unsub logger
+    // logger(); // unsub logger
   });
 
   it('Test updateMany action', () => {
