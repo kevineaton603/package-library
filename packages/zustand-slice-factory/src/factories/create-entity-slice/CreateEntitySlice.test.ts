@@ -84,7 +84,7 @@ describe('Testing Zustand', () => {
       result.current.reset();
     });
     expect(sliceState.current.lastModified).toBeNull();
-    expect(sliceState.current.entities).toMatchObject({});
+    expect(Object.values(sliceState.current.entities).length).toBe(0);
   });
 });
 
