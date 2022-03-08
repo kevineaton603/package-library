@@ -1,6 +1,7 @@
 import { EntitySliceState } from '../../factories/create-entity-slice/CreateEntitySlice';
 import { Comparer, EntityId, SelectIdMethod } from '../../types';
 import cloneDeep from 'lodash.clonedeep';
+import { createRecordFromArray } from '../../utils';
 
 export type Update<TEntity extends object> = {
   id: EntityId;
@@ -54,6 +55,7 @@ const createEntityAdapter = <TEntity extends object, TSliceState extends EntityS
     });
     const allEntities = Object.values(newState.entities).sort(options.sortComparer);
     newState.ids = allEntities.map(selectId);
+    newState.entities = createRecordFromArray(allEntities, selectId);
     return newState;
   };
 
